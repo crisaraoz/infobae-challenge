@@ -9,31 +9,43 @@ const predefinedTopics = [
     id: 'ai',
     title: 'Inteligencia Artificial',
     description: 'Explora las últimas tendencias en IA',
-    icon: '🤖'
+    icon: '🤖',
+    type: 'research'
   },
   {
     id: 'climate',
     title: 'Cambio Climático',
     description: 'Investigación sobre sostenibilidad y medio ambiente',
-    icon: '🌍'
+    icon: '🌍',
+    type: 'research'
   },
   {
     id: 'politics',
     title: 'Política',
     description: 'Análisis de la situación política nacional y global',
-    icon: '🏛️'
+    icon: '🏛️',
+    type: 'research'
   },
   {
     id: 'health',
     title: 'Salud',
     description: 'Tendencias en salud y medicina',
-    icon: '🏥'
+    icon: '🏥',
+    type: 'research'
   },
   {
     id: 'economy',
     title: 'Economía',
     description: 'Análisis de mercados y tendencias económicas globales',
-    icon: '📈'
+    icon: '📈',
+    type: 'research'
+  },
+  {
+    id: 'url-image',
+    title: 'URL o Imagen',
+    description: 'Genera artículos a partir de una URL o imagen usando IA',
+    icon: '🔗',
+    type: 'generate'
   },
 ];
 
@@ -46,11 +58,15 @@ export default function InvestigationPage() {
     setShowTopics(true);
   };
 
-  const handleTopicSelect = (topicTitle: string) => {
-    setSelectedTopic(topicTitle);
+  const handleTopicSelect = (topic: typeof predefinedTopics[0]) => {
+    setSelectedTopic(topic.title);
     // Pequeño delay para mostrar la selección antes de navegar
     setTimeout(() => {
-      router.push(`/research?topic=${encodeURIComponent(topicTitle)}`);
+      if (topic.type === 'generate') {
+        router.push('/generate');
+      } else {
+        router.push(`/research?topic=${encodeURIComponent(topic.title)}`);
+      }
     }, 300);
   };
 
@@ -106,13 +122,20 @@ export default function InvestigationPage() {
               {predefinedTopics.map((topic) => (
                 <div
                   key={topic.id}
-                  onClick={() => handleTopicSelect(topic.title)}
+                  onClick={() => handleTopicSelect(topic)}
                   className={`
                     group cursor-pointer bg-white rounded-xl p-6 shadow-lg hover:shadow-2xl 
-                    transform hover:scale-105 transition-all duration-300 border-2 
+                    transform hover:scale-105 transition-all duration-300 border-2 relative
                     ${selectedTopic === topic.title ? 'border-blue-400 bg-blue-50' : 'border-transparent hover:border-blue-200'}
+                    ${topic.type === 'generate' ? 'bg-gradient-to-br from-purple-50 to-pink-50 border-purple-200' : ''}
                   `}
                 >
+                  {topic.type === 'generate' && (
+                    <div className="absolute top-2 right-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs px-2 py-1 rounded-full">
+                      AI SDK
+                    </div>
+                  )}
+                  
                   <div className="text-4xl mb-4 group-hover:scale-110 transition-transform duration-300">
                     {topic.icon}
                   </div>
