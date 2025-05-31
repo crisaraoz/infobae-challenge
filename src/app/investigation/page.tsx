@@ -50,7 +50,7 @@ export default function InvestigationPage() {
     setSelectedTopic(topicTitle);
     // Pequeño delay para mostrar la selección antes de navegar
     setTimeout(() => {
-      router.push(`/article?topic=${encodeURIComponent(topicTitle)}`);
+      router.push(`/research?topic=${encodeURIComponent(topicTitle)}`);
     }, 300);
   };
 
@@ -145,10 +145,8 @@ export default function InvestigationPage() {
         {/* Footer con info adicional */}
         <div className="mt-16 text-center">
           <div className="inline-flex items-center space-x-2 text-gray-400 text-sm">
-            <span>Potenciado por</span>
-            <span className="font-semibold text-blue-600">AI SDK</span>
-            <span>+</span>
-            <span className="font-semibold text-purple-600">Exa API</span>
+            <span>Develop by</span>
+            <span className="font-semibold text-blue-600">CrisAraoz</span>
           </div>
         </div>
       </div>
