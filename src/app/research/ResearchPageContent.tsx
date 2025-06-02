@@ -54,12 +54,16 @@ export default function ResearchPageContent() {
   }, [topic, router]);
 
   const handleStartArticle = (result: CategorizedResult) => {
-    // Navegar a la página de generación de artículo con la información del resultado
+    // Navegar a la página de generación de artículo con la información completa del resultado
     const params = new URLSearchParams({
       topic: topic || '',
       title: result.title,
       url: result.url,
-      content: result.text || ''
+      content: result.text || '',
+      author: result.author || '',
+      score: (result.score ? Math.round(result.score * 100) : 0).toString(),
+      publishedDate: result.publishedDate || '',
+      reasoning: result.reasoning || ''
     });
     router.push(`/article?${params.toString()}`);
   };

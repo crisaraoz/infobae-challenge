@@ -3,131 +3,318 @@
 import { useSearchParams } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { ExternalLink, Clock, Star, FileText, Sparkles } from 'lucide-react';
 import Link from 'next/link';
+
+// Función auxiliar para generar el artículo estructurado
+const generateStructuredArticle = (
+  topic: string, 
+  title: string, 
+  content: string, 
+  reasoning?: string | null,
+  publishedDate?: string | null,
+  score?: string | null,
+  url?: string | null,
+  author?: string | null
+) => {
+  // El contenido que llega ya es el resumen generado por OpenAI en el backend
+  
+  return `# ${title}
+
+## Resumen Ejecutivo
+
+${content}
+
+## Contexto e Importancia
+
+Este hallazgo sobre **${topic}** representa un desarrollo significativo que merece atención especial. La investigación realizada ha identificado elementos clave que pueden tener implicaciones importantes para el campo.
+
+## Análisis de Relevancia
+
+### ¿Por qué es importante este contenido?
+
+${reasoning ? `**Criterio de selección:** ${reasoning}` : 'Este contenido fue identificado como prioritario basado en múltiples factores de calidad y relevancia.'}
+
+- **Actualidad**: ${publishedDate ? `Publicado el ${new Date(publishedDate).toLocaleDateString('es-ES')}` : 'Información procesada recientemente'}
+- **Calidad**: ${score ? `Puntuación de relevancia: ${score}%` : 'Contenido verificado y analizado'}
+- **Alcance**: Potencial para generar insights valiosos
+
+### Factores Clave Identificados
+
+1. **Tendencias Emergentes**: Los patrones identificados sugieren desarrollos importantes en el área de ${topic}
+2. **Oportunidades de Investigación**: Existen áreas específicas que merecen mayor exploración
+3. **Relevancia Práctica**: La información presenta aplicaciones concretas y verificables
+
+## Implicaciones y Perspectivas
+
+### Impacto Inmediato
+
+Los hallazgos relacionados con este tema sugieren que:
+
+- Hay desarrollos activos que requieren seguimiento continuo
+- Las tendencias identificadas pueden influir en decisiones futuras
+- El conocimiento generado contribuye al entendimiento del campo
+
+### Consideraciones para el Futuro
+
+Basado en el análisis realizado sobre **${topic}**, se recomienda:
+
+1. **Monitoreo Activo**: Seguir de cerca los desarrollos en esta área específica
+2. **Investigación Complementaria**: Buscar fuentes adicionales que complementen estos hallazgos
+3. **Aplicación Práctica**: Evaluar cómo estos insights pueden aplicarse en contextos reales
+
+## Fuente y Verificación
+
+${url ? `**Fuente original:** [${url}](${url})` : 'Información procesada y verificada automáticamente'}
+${author ? `**Autor:** ${author}` : ''}
+
+## Conclusión
+
+Este análisis de **${topic}** proporciona una base sólida para comprender los aspectos más relevantes del tema. La información recopilada y procesada ofrece perspectivas valiosas que pueden servir como punto de partida para investigaciones más profundas o decisiones informadas.
+
+La calidad y relevancia del contenido analizado confirman su valor para el desarrollo de conocimiento en esta área específica.
+
+---
+
+*Artículo generado automáticamente basado en investigación y análisis de contenido relevante. Se recomienda verificación adicional para aplicaciones específicas.*`;
+};
 
 export default function ArticlePageContent() {
   const searchParams = useSearchParams();
   const topic = searchParams.get('topic');
+  const title = searchParams.get('title');
+  const url = searchParams.get('url');
+  const content = searchParams.get('content');
+  const author = searchParams.get('author');
+  const score = searchParams.get('score');
+  const publishedDate = searchParams.get('publishedDate');
+  const reasoning = searchParams.get('reasoning');
+  
   const [loading, setLoading] = useState(true);
-  const [article, setArticle] = useState<string>('');
+  const [generatedArticle, setGeneratedArticle] = useState<string>('');
 
   useEffect(() => {
-    // Simular carga de artículo
-    const timer = setTimeout(() => {
-      setArticle(`
-        # Artículo sobre ${topic}
-
-        Este es un artículo generado automáticamente sobre el tema: **${topic}**.
-
-        ## Introducción
-
-        En este artículo exploraremos los aspectos más importantes relacionados con ${topic}. 
-        A través de una investigación exhaustiva, hemos recopilado información relevante 
-        que te ayudará a comprender mejor este tema.
-
-        ## Desarrollo
-
-        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor 
-        incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis 
-        nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
-
-        ### Puntos Clave
-
-        - Punto importante 1 sobre ${topic}
-        - Punto importante 2 sobre ${topic}
-        - Punto importante 3 sobre ${topic}
-
-        ## Conclusión
-
-        En conclusión, ${topic} es un tema de gran relevancia que requiere atención 
-        continua y análisis detallado.
-      `);
+    if (!topic || !title || !content) {
       setLoading(false);
-    }, 2000);
+      return;
+    }
+
+    // Simular procesamiento del contenido para generar un artículo estructurado
+    const timer = setTimeout(() => {
+      const structuredArticle = generateStructuredArticle(topic, title, content, reasoning, publishedDate, score, url, author);
+      setGeneratedArticle(structuredArticle);
+      setLoading(false);
+    }, 1500);
 
     return () => clearTimeout(timer);
-  }, [topic]);
+  }, [topic, title, content, reasoning, publishedDate, score, url, author]);
 
   if (!topic) {
     return (
       <main className="flex flex-col items-center justify-center min-h-screen p-4">
-        <h1 className="text-2xl font-semibold mb-4">No se encontró el tema</h1>
-        <Link href="/investigation">
-          <Button>Volver a Investigación</Button>
-        </Link>
+        <div className="text-center max-w-md">
+          <FileText className="mx-auto h-16 w-16 text-gray-400 mb-4" />
+          <h1 className="text-2xl font-semibold mb-4 text-gray-800">No se encontró el tema</h1>
+          <p className="text-gray-600 mb-6">No se proporcionó información suficiente para generar el artículo.</p>
+          <Link href="/investigation">
+            <Button>Volver a Investigación</Button>
+          </Link>
+        </div>
       </main>
     );
   }
 
   return (
-    <main className="max-w-4xl mx-auto p-4 py-8">
-      <div className="mb-6">
-        <Link href="/investigation">
-          <Button variant="outline" className="mb-4">
-            ← Volver a Investigación
-          </Button>
-        </Link>
-      </div>
-
-      {loading ? (
-        <div className="flex flex-col items-center justify-center py-12">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mb-4"></div>
-          <p className="text-lg">Generando artículo sobre {topic}...</p>
-        </div>
-      ) : (
-        <article className="prose prose-lg max-w-none">
-          <div className="whitespace-pre-line">
-            {article.split('\n').map((line, index) => {
-              if (line.startsWith('# ')) {
-                return (
-                  <h1 key={index} className="text-3xl font-bold mb-6 text-gray-900">
-                    {line.replace('# ', '')}
-                  </h1>
-                );
-              }
-              if (line.startsWith('## ')) {
-                return (
-                  <h2 key={index} className="text-2xl font-semibold mb-4 mt-8 text-gray-800">
-                    {line.replace('## ', '')}
-                  </h2>
-                );
-              }
-              if (line.startsWith('### ')) {
-                return (
-                  <h3 key={index} className="text-xl font-semibold mb-3 mt-6 text-gray-700">
-                    {line.replace('### ', '')}
-                  </h3>
-                );
-              }
-              if (line.startsWith('- ')) {
-                return (
-                  <li key={index} className="mb-2 text-gray-600">
-                    {line.replace('- ', '')}
-                  </li>
-                );
-              }
-              if (line.includes('**')) {
-                const parts = line.split('**');
-                return (
-                  <p key={index} className="mb-4 text-gray-600 leading-relaxed">
-                    {parts.map((part, i) => 
-                      i % 2 === 1 ? <strong key={i}>{part}</strong> : part
+    <main className="min-h-screen bg-gradient-to-br from-blue-50 to-white">
+      <div className="max-w-4xl mx-auto p-4 py-8">
+        {/* Header con navegación */}
+        <div className="mb-8">
+          <Link href="/investigation">
+            <Button variant="outline" className="mb-6">
+              ← Volver a Investigación
+            </Button>
+          </Link>
+          
+          {/* Info del artículo */}
+          {title && (
+            <Card className="mb-6 border-l-4 border-l-blue-500">
+              <CardHeader>
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <CardTitle className="text-lg mb-2">Fuente de Investigación</CardTitle>
+                    <CardDescription className="text-base text-gray-700 font-medium">
+                      {title}
+                    </CardDescription>
+                    {reasoning && (
+                      <p className="text-sm text-gray-600 mt-2">
+                        <strong>Criterio:</strong> {reasoning}
+                      </p>
                     )}
-                  </p>
-                );
-              }
-              if (line.trim()) {
-                return (
-                  <p key={index} className="mb-4 text-gray-600 leading-relaxed">
-                    {line}
-                  </p>
-                );
-              }
-              return <br key={index} />;
-            })}
+                  </div>
+                  <div className="ml-4 flex flex-col gap-2">
+                    <Badge variant="secondary">
+                      <Star className="h-3 w-3 mr-1" />
+                      Vale la pena expandir
+                    </Badge>
+                    {score && (
+                      <Badge variant="outline" className="text-center">
+                        Puntuación: {score}%
+                      </Badge>
+                    )}
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center justify-between flex-wrap gap-4">
+                  <div className="flex items-center text-sm text-gray-600">
+                    <Clock className="h-4 w-4 mr-2" />
+                    <span>
+                      {publishedDate 
+                        ? `Publicado: ${new Date(publishedDate).toLocaleDateString('es-ES')}`
+                        : 'Generado automáticamente'
+                      }
+                    </span>
+                    {author && (
+                      <span className="ml-4">
+                        <strong>Autor:</strong> {author}
+                      </span>
+                    )}
+                  </div>
+                  {url && (
+                    <a
+                      href={url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center text-blue-600 hover:text-blue-800 text-sm"
+                    >
+                      <ExternalLink className="h-4 w-4 mr-1" />
+                      Ver fuente original
+                    </a>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+
+        {/* Contenido del artículo */}
+        <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+          <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-6 text-white">
+            <div className="flex items-center mb-2">
+              <Sparkles className="h-6 w-6 mr-2" />
+              <span className="text-sm font-medium opacity-90">Artículo Generado con IA</span>
+            </div>
+            <h1 className="text-2xl md:text-3xl font-bold">
+              {title || `Investigación sobre ${topic}`}
+            </h1>
+            <p className="mt-2 opacity-90">
+              Análisis basado en la investigación sobre <strong>{topic}</strong>
+            </p>
           </div>
-        </article>
-      )}
+
+          <div className="p-6 md:p-8">
+            {loading ? (
+              <div className="flex flex-col items-center justify-center py-12">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
+                <p className="text-lg text-gray-600">Generando artículo estructurado...</p>
+                <p className="text-sm text-gray-500 mt-2">Procesando información de la investigación</p>
+              </div>
+            ) : (
+              <article className="prose prose-lg max-w-none">
+                <div className="space-y-6">
+                  {generatedArticle.split('\n').map((line, index) => {
+                    if (line.trim() === '') return <br key={index} />;
+                    
+                    if (line.startsWith('# ')) {
+                      return (
+                        <h1 key={index} className="text-3xl font-bold mb-6 text-gray-900 border-b border-gray-200 pb-3">
+                          {line.replace('# ', '')}
+                        </h1>
+                      );
+                    }
+                    if (line.startsWith('## ')) {
+                      return (
+                        <h2 key={index} className="text-2xl font-semibold mb-4 mt-8 text-gray-800">
+                          {line.replace('## ', '')}
+                        </h2>
+                      );
+                    }
+                    if (line.startsWith('### ')) {
+                      return (
+                        <h3 key={index} className="text-xl font-semibold mb-3 mt-6 text-gray-700">
+                          {line.replace('### ', '')}
+                        </h3>
+                      );
+                    }
+                    if (line.match(/^\d+\.\s/)) {
+                      return (
+                        <li key={index} className="mb-2 text-gray-700 list-decimal list-inside">
+                          {line.replace(/^\d+\.\s/, '')}
+                        </li>
+                      );
+                    }
+                    if (line.startsWith('- ')) {
+                      return (
+                        <li key={index} className="mb-2 text-gray-700 list-disc list-inside">
+                          {line.replace('- ', '')}
+                        </li>
+                      );
+                    }
+                    if (line.startsWith('---')) {
+                      return <hr key={index} className="my-8 border-gray-200" />;
+                    }
+                    if (line.startsWith('*') && line.endsWith('*')) {
+                      return (
+                        <p key={index} className="text-sm text-gray-500 italic mb-4 border-l-4 border-gray-200 pl-4">
+                          {line.replace(/^\*/, '').replace(/\*$/, '')}
+                        </p>
+                      );
+                    }
+                    
+                    // Procesar texto con markdown básico
+                    const processMarkdown = (text: string) => {
+                      const parts = text.split(/(\*\*[^*]+\*\*)/);
+                      return parts.map((part, i) => 
+                        part.startsWith('**') && part.endsWith('**') 
+                          ? <strong key={i} className="text-gray-900">{part.slice(2, -2)}</strong> 
+                          : part
+                      );
+                    };
+                    
+                    if (line.trim()) {
+                      return (
+                        <p key={index} className="mb-4 text-gray-700 leading-relaxed">
+                          {processMarkdown(line)}
+                        </p>
+                      );
+                    }
+                    return null;
+                  }).filter(Boolean)}
+                </div>
+              </article>
+            )}
+          </div>
+        </div>
+
+        {/* Actions */}
+        <div className="mt-8 flex flex-wrap gap-4 justify-center">
+          <Link href={`/research?topic=${encodeURIComponent(topic)}`}>
+            <Button variant="outline">
+              Ver más resultados sobre {topic}
+            </Button>
+          </Link>
+          {url && (
+            <a href={url} target="_blank" rel="noopener noreferrer">
+              <Button variant="outline">
+                <ExternalLink className="h-4 w-4 mr-2" />
+                Leer fuente original
+              </Button>
+            </a>
+          )}
+        </div>
+      </div>
     </main>
   );
 } 
