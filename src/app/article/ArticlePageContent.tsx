@@ -1,12 +1,15 @@
 'use client';
 
 import { useSearchParams } from 'next/navigation';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ExternalLink, Clock, Star, FileText, Sparkles } from 'lucide-react';
+import { ExternalLink, Clock, Star, FileText, Sparkles, Lightbulb, Loader2 } from 'lucide-react';
 import Link from 'next/link';
+import { Input } from '@/components/ui/input';
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
 
 // Función auxiliar para generar el artículo estructurado
 const generateStructuredArticle = (
@@ -84,34 +87,83 @@ La calidad y relevancia del contenido analizado confirman su valor para el desar
 export default function ArticlePageContent() {
   const searchParams = useSearchParams();
   const topic = searchParams.get('topic');
-  const title = searchParams.get('title');
+  const initialTitle = searchParams.get('title');
   const url = searchParams.get('url');
   const content = searchParams.get('content');
   const author = searchParams.get('author');
   const score = searchParams.get('score');
   const publishedDate = searchParams.get('publishedDate');
   const reasoning = searchParams.get('reasoning');
-  
   const [loading, setLoading] = useState(true);
   const [generatedArticle, setGeneratedArticle] = useState<string>('');
+  const [currentArticleTitle, setCurrentArticleTitle] = useState<string | null>(initialTitle);
 
-  useEffect(() => {
-    if (!topic || !title || !content) {
+  // State for title generation
+  const [numTitlesToGenerate, setNumTitlesToGenerate] = useState<number>(3);
+  const [suggestedTitles, setSuggestedTitles] = useState<string[]>([]);
+  const [isGeneratingTitles, setIsGeneratingTitles] = useState<boolean>(false);
+  const [titleError, setTitleError] = useState<string | null>(null);
+
+  const generateAndSetArticle = useCallback(() => {
+    if (!topic || !currentArticleTitle || !content) {
       setLoading(false);
       return;
     }
+    const structuredArticle = generateStructuredArticle(topic, currentArticleTitle, content, reasoning, publishedDate, score, url, author);
+    setGeneratedArticle(structuredArticle);
+    setLoading(false);
+  }, [topic, currentArticleTitle, content, reasoning, publishedDate, score, url, author]);
 
-    // Simular procesamiento del contenido para generar un artículo estructurado
+  useEffect(() => {
+    // Initial article generation
+    setLoading(true);
     const timer = setTimeout(() => {
-      const structuredArticle = generateStructuredArticle(topic, title, content, reasoning, publishedDate, score, url, author);
-      setGeneratedArticle(structuredArticle);
-      setLoading(false);
-    }, 1500);
+      generateAndSetArticle();
+    }, 500); // Reduced initial timer, actual content generation is quick
 
     return () => clearTimeout(timer);
-  }, [topic, title, content, reasoning, publishedDate, score, url, author]);
+  }, [generateAndSetArticle]); // Rerun if title changes
 
-  if (!topic) {
+  const handleGenerateTitles = async () => {
+    if (!content || numTitlesToGenerate <= 0) {
+      setTitleError('El contenido del artículo no puede estar vacío y debe solicitar al menos 1 título.');
+      return;
+    }
+    setIsGeneratingTitles(true);
+    setTitleError(null);
+    setSuggestedTitles([]);
+
+    try {
+      const response = await fetch('/api/generate-titles', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ articleContent: content, numTitles: numTitlesToGenerate }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || `Error ${response.status}`);
+      }
+
+      const data = await response.json();
+      if (data.titles && data.titles.length > 0) {
+        setSuggestedTitles(data.titles);
+      } else {
+        setTitleError('No se pudieron generar títulos. Intente nuevamente.');
+      }
+    } catch (err) {
+      console.error('Failed to generate titles:', err);
+      setTitleError(err instanceof Error ? err.message : 'Ocurrió un error desconocido.');
+    } finally {
+      setIsGeneratingTitles(false);
+    }
+  };
+
+  const handleTitleSelection = (newTitle: string) => {
+    setCurrentArticleTitle(newTitle);
+  };
+
+  if (!topic || !initialTitle) {
     return (
       <main className="flex flex-col items-center justify-center min-h-screen p-4">
         <div className="text-center max-w-md">
@@ -138,14 +190,14 @@ export default function ArticlePageContent() {
           </Link>
           
           {/* Info del artículo */}
-          {title && (
+          {currentArticleTitle && (
             <Card className="mb-6 border-l-4 border-l-blue-500">
               <CardHeader>
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <CardTitle className="text-lg mb-2">Fuente de Investigación</CardTitle>
                     <CardDescription className="text-base text-gray-700 font-medium">
-                      {title}
+                      {currentArticleTitle}
                     </CardDescription>
                     {reasoning && (
                       <p className="text-sm text-gray-600 mt-2">
@@ -199,6 +251,61 @@ export default function ArticlePageContent() {
           )}
         </div>
 
+        {/* Title Generation Section */}
+        <Card className="my-8">
+          <CardHeader>
+            <CardTitle className="flex items-center">
+              <Lightbulb className="h-5 w-5 mr-2 text-yellow-500" />
+              Sugerencia de Títulos (Opcional)
+            </CardTitle>
+            <CardDescription>
+              Genera títulos alternativos para tu artículo basados en el contenido actual.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center space-x-3">
+              <Label htmlFor="numTitles" className="whitespace-nowrap">Número de títulos:</Label>
+              <Input 
+                id="numTitles"
+                type="number" 
+                value={numTitlesToGenerate} 
+                onChange={(e) => setNumTitlesToGenerate(Math.max(1, Math.min(10, parseInt(e.target.value, 10))))} 
+                min="1" 
+                max="10"
+                className="w-20"
+              />
+              <Button onClick={handleGenerateTitles} disabled={isGeneratingTitles || !content}>
+                {isGeneratingTitles ? (
+                  <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Generando...</>
+                ) : (
+                  'Generar Títulos'
+                )}
+              </Button>
+            </div>
+
+            {titleError && (
+              <p className="text-sm text-red-600">Error: {titleError}</p>
+            )}
+
+            {suggestedTitles.length > 0 && (
+              <div className="space-y-3 pt-4">
+                <h4 className="font-medium text-gray-800">Títulos Sugeridos:</h4>
+                <RadioGroup value={currentArticleTitle || undefined} onValueChange={handleTitleSelection}>
+                  {suggestedTitles.map((sTitle, index) => (
+                    <div key={index} className="flex items-center space-x-2 p-2 border rounded-md hover:bg-gray-50">
+                      <RadioGroupItem value={sTitle} id={`title-${index}`} />
+                      <Label htmlFor={`title-${index}`} className="font-normal cursor-pointer flex-1">
+                        {sTitle}
+                      </Label>
+                    </div>
+                  ))}
+                </RadioGroup>
+                 <p className="text-xs text-gray-500 pt-1">Selecciona un título para actualizar el artículo.</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
         {/* Contenido del artículo */}
         <div className="bg-white rounded-lg shadow-lg overflow-hidden">
           <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-6 text-white">
@@ -207,7 +314,7 @@ export default function ArticlePageContent() {
               <span className="text-sm font-medium opacity-90">Artículo Generado con IA</span>
             </div>
             <h1 className="text-2xl md:text-3xl font-bold">
-              {title || `Investigación sobre ${topic}`}
+              {currentArticleTitle || `Investigación sobre ${topic}`}
             </h1>
             <p className="mt-2 opacity-90">
               Análisis basado en la investigación sobre <strong>{topic}</strong>
