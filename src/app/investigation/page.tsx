@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -87,6 +87,14 @@ export default function InvestigationPage() {
   const [viewMode, setViewMode] = useState<ViewMode>('cards');
   const [activeTab, setActiveTab] = useState<'predefined' | 'custom'>('predefined');
   const router = useRouter();
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    const showParam = searchParams.get('show');
+    if (showParam === 'topics') {
+      setShowTopics(true);
+    }
+  }, [searchParams]);
 
   const handleStartResearch = () => {
     setShowTopics(true);
