@@ -5,12 +5,14 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { performResearch, categorizeResearchResults } from '@/app/actions/research';
 import { CategorizedResult } from '@/types';
+import { useResearchCache } from '@/hooks/useResearchCache';
 import Link from 'next/link';
 
 export default function ResearchPageContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const topic = searchParams.get('topic');
+  const { getCache, setCache } = useResearchCache();
 
   const [isLoading, setIsLoading] = useState(true);
   const [results, setResults] = useState<CategorizedResult[]>([]);
@@ -33,13 +35,23 @@ export default function ResearchPageContent() {
       setIsLoading(true);
       setError(null);
 
+      const cachedData = getCache(topic);
+      if (cachedData) {
+        setResults(cachedData.results);
+        setCategorizedResults(cachedData.categorized);
+        setIsLoading(false);
+        console.log('♻️ Resultados cargados desde cache para:', topic);
+        return;
+      }
+
       try {
+        console.log('🌐 Realizando nueva investigación para:', topic);
         const response = await performResearch(topic);
-        console.log("response en ResearchPageContent...", response)
         if (response.success && response.results) {
-          setResults(response.results);
           const categorized = await categorizeResearchResults(response.results);
+          setResults(response.results);
           setCategorizedResults(categorized);
+          setCache(topic, { results: response.results, categorized, timestamp: Date.now() });
         } else {
           setError(response.error || 'Error desconocido');
         }
@@ -51,15 +63,18 @@ export default function ResearchPageContent() {
     };
 
     fetchResearch();
-  }, [topic, router]);
+  }, [topic, router, getCache, setCache]);
 
   const handleStartArticle = (result: CategorizedResult) => {
-    // Navegar a la página de generación de artículo con la información del resultado
     const params = new URLSearchParams({
       topic: topic || '',
       title: result.title,
       url: result.url,
-      content: result.text || ''
+      content: result.text || '',
+      author: result.author || '',
+      score: (result.score ? Math.round(result.score * 100) : 0).toString(),
+      publishedDate: result.publishedDate || '',
+      reasoning: result.reasoning || ''
     });
     router.push(`/article?${params.toString()}`);
   };
@@ -106,7 +121,7 @@ export default function ResearchPageContent() {
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="text-center mb-8">
-          <Link href="/investigation">
+          <Link href="/investigation?show=topics">
             <Button variant="outline" className="mb-4">
               ← Volver a investigación
             </Button>
