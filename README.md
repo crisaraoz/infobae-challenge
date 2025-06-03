@@ -4,31 +4,28 @@ Un sistema avanzado de investigación que utiliza inteligencia artificial para b
 
 ## 🎬 Demostración
 
-### 📹 Videos Demo
+### 📸 Capturas de Pantalla
 
-**🔍 Demo 1 - Proceso de Investigación Completo**
+**🔍 Proceso de Investigación Completo**
 
-<video width="100%" controls>
-  <source src="./public/demo1.mkv" type="video/x-matroska">
-  Tu navegador no soporta el elemento video.
-</video>
+<div align="center">
+  <img src="./public/screen_1.png" alt="Pantalla inicial de investigación" width="45%" />
+  <img src="./public/screen_2.png" alt="Proceso de búsqueda" width="45%" />
+</div>
 
-*Muestra el flujo completo desde la búsqueda hasta la categorización de resultados*
+<div align="center">
+  <img src="./public/screen_3.png" alt="Resultados categorizados" width="45%" />
+  <img src="./public/screen_4.png" alt="Generación de artículos" width="45%" />
+</div>
 
-**📝 Demo 2 - Generación de Artículos**
+### 🖼️ **Galería de funcionalidades:**
 
-<video width="100%" controls>
-  <source src="./public/demo2.mkv" type="video/x-matroska">
-  Tu navegador no soporta el elemento video.
-</video>
+1. **🏠 Pantalla inicial** (`screen_1.png`) - Interfaz principal y búsqueda
+2. **🔍 Proceso de búsqueda** (`screen_2.png`) - IA procesando consultas
+3. **📊 Resultados categorizados** (`screen_3.png`) - Análisis y categorización
+4. **📝 Generación de artículos** (`screen_4.png`) - Creación de contenido
 
-*Demuestra cómo se generan artículos a partir de las fuentes investigadas*
-
-> **📁 Archivos locales**: Los videos también están disponibles en la carpeta `public/` del proyecto:
-> - `public/demo1.mkv` - Demo del proceso de investigación
-> - `public/demo2.mkv` - Demo de generación de artículos
-
-### ✨ Lo que verás en los demos:
+### ✨ Lo que ves en las capturas:
 - 🔍 **Búsqueda inteligente** con optimización de consultas
 - ⚡ **Velocidad de compilación** mejorada (3.5s vs 14.6s)
 - 📊 **Categorización automática** de resultados
@@ -172,15 +169,7 @@ npm run optimize     # Aplicar optimizaciones de rendimiento
 - **Type checking opcional**: Modo rápido sin verificación de tipos
 - **Bundle optimization**: Análisis y optimización de bundles
 
-### 📈 Métricas de Rendimiento
-
-| Métrica | Antes | Después | Mejora |
-|---------|-------|---------|--------|
-| Compilación inicial | ~14.6s | ~3.5s | 76% ⬆️ |
-| Hot reload | ~5s | <1s | 80% ⬆️ |
-| Rutas individuales | ~4-5s | ~1-2s | 70% ⬆️ |
-
-## 🔮 Roadmap y Mejoras Futuras
+## 🔮 Posibilidad de Nuevas Futuras
 
 ### 🎯 Versión 2.0
 
@@ -281,35 +270,8 @@ npm run dev
 - Limita el uso de APIs según necesidad
 
 ### 💾 Recomendaciones de Desarrollo
-- **Filesystem**: Mueve el proyecto fuera de OneDrive para mejor rendimiento
+- **Filesystem**: Mover el proyecto fuera de OneDrive para mejor rendimiento
 - **Memoria**: Usa al menos 8GB RAM para desarrollo fluido
 - **Node.js**: Versión 18+ recomendada
 - **Antivirus**: Excluye `node_modules` y `.next` del escaneo
 
-## 🤝 Contribución
-
-1. Fork el proyecto
-2. Crea una rama para tu feature (`git checkout -b feature/AmazingFeature`)
-3. Commit tus cambios (`git commit -m 'Add some AmazingFeature'`)
-4. Push a la rama (`git push origin feature/AmazingFeature`)
-5. Abre un Pull Request
-
-## 📄 Licencia
-
-Este proyecto está bajo la licencia MIT. Ver `LICENSE` para más detalles.
-
-## 👥 Equipo
-
-- **Desarrollador Principal**: [Tu Nombre]
-- **Arquitectura**: Sistema modular con principios Clean Architecture
-- **IA Integration**: OpenAI + Exa APIs
-
----
-
-**¿Necesitas ayuda?** 🆘
-
-- 📖 Lee la documentación completa en `src/ARCHITECTURE.md`
-- 🐛 Reporta bugs en GitHub Issues
-- 💡 Sugiere mejoras en GitHub Discussions
-
-¡Gracias por usar Infobae AI Challenge! 🚀
