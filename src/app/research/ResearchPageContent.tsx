@@ -1,20 +1,22 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { performResearch, categorizeResearchResults } from '@/app/actions/research';
 import { CategorizedResult } from '@/types';
 import { useResearchCache } from '@/hooks/useResearchCache';
+import { RefreshCw } from 'lucide-react';
 import Link from 'next/link';
 
 export default function ResearchPageContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const topic = searchParams.get('topic');
-  const { getCache, setCache } = useResearchCache();
+  const { getCache, setCache, clearCache } = useResearchCache();
 
   const [isLoading, setIsLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [results, setResults] = useState<CategorizedResult[]>([]);
   const [categorizedResults, setCategorizedResults] = useState<{
     expandWorthy: CategorizedResult[];
@@ -25,45 +27,50 @@ export default function ResearchPageContent() {
   });
   const [error, setError] = useState<string | null>(null);
 
+  const fetchResearch = useCallback(async (forceRefresh: boolean = false) => {
+    if (!topic) return;
+    
+    setIsLoading(!forceRefresh);
+    setIsRefreshing(forceRefresh);
+    setError(null);
+
+    if (forceRefresh) {
+      clearCache(topic);
+    }
+
+    const cachedData = getCache(topic);
+    if (cachedData && !forceRefresh) {
+      setResults(cachedData.results);
+      setCategorizedResults(cachedData.categorized);
+      setIsLoading(false);
+      setIsRefreshing(false);
+      console.log('♻️ Resultados cargados desde cache para:', topic);
+      return;
+    }
+
+    try {
+      console.log('🌐 Realizando nueva investigación para:', topic);
+      const results = await performResearch(topic);
+      const categorized = await categorizeResearchResults(results);
+      setResults(results);
+      setCategorizedResults(categorized);
+      setCache(topic, { results, categorized, timestamp: Date.now() });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Error al realizar la investigación');
+    } finally {
+      setIsLoading(false);
+      setIsRefreshing(false);
+    }
+  }, [topic, clearCache, getCache, setCache]);
+
   useEffect(() => {
     if (!topic) {
       router.push('/investigation');
       return;
     }
 
-    const fetchResearch = async () => {
-      setIsLoading(true);
-      setError(null);
-
-      const cachedData = getCache(topic);
-      if (cachedData) {
-        setResults(cachedData.results);
-        setCategorizedResults(cachedData.categorized);
-        setIsLoading(false);
-        console.log('♻️ Resultados cargados desde cache para:', topic);
-        return;
-      }
-
-      try {
-        console.log('🌐 Realizando nueva investigación para:', topic);
-        const response = await performResearch(topic);
-        if (response.success && response.results) {
-          const categorized = await categorizeResearchResults(response.results);
-          setResults(response.results);
-          setCategorizedResults(categorized);
-          setCache(topic, { results: response.results, categorized, timestamp: Date.now() });
-        } else {
-          setError(response.error || 'Error desconocido');
-        }
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Error al realizar la investigación');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
     fetchResearch();
-  }, [topic, router, getCache, setCache]);
+  }, [topic, router, fetchResearch]);
 
   const handleStartArticle = (result: CategorizedResult) => {
     const params = new URLSearchParams({
@@ -79,8 +86,12 @@ export default function ResearchPageContent() {
     router.push(`/article?${params.toString()}`);
   };
 
+  const handleRefreshInvestigation = () => {
+    fetchResearch(true);
+  };
+
   if (!topic) {
-    return null; // Se redirige en useEffect
+    return null;
   }
 
   if (isLoading) {
@@ -121,16 +132,34 @@ export default function ResearchPageContent() {
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="text-center mb-8">
-          <Link href="/investigation?show=topics">
-            <Button variant="outline" className="mb-4">
-              ← Volver a investigación
+          <div className="flex justify-between items-center mb-4">
+            <Link href="/investigation?show=topics">
+              <Button variant="outline">
+                ← Volver a investigación
+              </Button>
+            </Link>
+            
+            <Button 
+              onClick={handleRefreshInvestigation}
+              disabled={isRefreshing}
+              variant="outline"
+              className="flex items-center gap-2"
+            >
+              <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+              {isRefreshing ? 'Actualizando...' : 'Nueva Investigación'}
             </Button>
-          </Link>
+          </div>
+          
           <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
             Resultados para: {topic}
           </h1>
           <p className="text-gray-600">
             {results.length} resultados encontrados y categorizados
+            {isRefreshing && (
+              <span className="ml-2 text-blue-600 font-medium">
+                • Actualizando resultados...
+              </span>
+            )}
           </p>
         </div>
 

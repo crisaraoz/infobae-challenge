@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -80,7 +80,7 @@ const predefinedTopics = [
   },
 ];
 
-export default function InvestigationPage() {
+function InvestigationPageContent() {
   const [showTopics, setShowTopics] = useState(false);
   const [selectedTopic, setSelectedTopic] = useState<string | null>(null);
   const [customTopic, setCustomTopic] = useState('');
@@ -410,5 +410,18 @@ export default function InvestigationPage() {
         </div>
       </div>
     </main>
+  );
+}
+
+export default function InvestigationPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-gradient-to-br from-blue-100 via-white to-purple-100 flex items-center justify-center">
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+        <p className="text-gray-600">Cargando página de investigación...</p>
+      </div>
+    </div>}>
+      <InvestigationPageContent />
+    </Suspense>
   );
 }
