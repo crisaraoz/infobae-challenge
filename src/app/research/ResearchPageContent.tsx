@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { performResearch, categorizeResearchResults } from '@/app/actions/research';
-import { CategorizedResult } from '@/types';
+import type { CategorizedResult } from '@/types';
 import { useResearchCache } from '@/hooks/useResearchCache';
 import { RefreshCw } from 'lucide-react';
 import Link from 'next/link';
