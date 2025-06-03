@@ -19,7 +19,7 @@ export async function performResearch(topic: string): Promise<CategorizedResult[
     
     // Manejo específico para errores de timeout
     if (error instanceof Error && error.message.includes('Timeout')) {
-      throw new Error(`⏱️ ${error.message}`);
+      throw new Error(`⏱️ ${error.message.replace('45 segundos', '30 segundos')}`);
     }
     
     // Error genérico para otros casos

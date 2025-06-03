@@ -17,6 +17,8 @@ export default function ResearchPageContent() {
 
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [progressMessage, setProgressMessage] = useState('');
   const [results, setResults] = useState<CategorizedResult[]>([]);
   const [categorizedResults, setCategorizedResults] = useState<{
     expandWorthy: CategorizedResult[];
@@ -33,6 +35,8 @@ export default function ResearchPageContent() {
     setIsLoading(!forceRefresh);
     setIsRefreshing(forceRefresh);
     setError(null);
+    setProgress(0);
+    setProgressMessage('Iniciando investigación...');
 
     if (forceRefresh) {
       clearCache(topic);
@@ -42,8 +46,12 @@ export default function ResearchPageContent() {
     if (cachedData && !forceRefresh) {
       setResults(cachedData.results);
       setCategorizedResults(cachedData.categorized);
-      setIsLoading(false);
-      setIsRefreshing(false);
+      setProgress(100);
+      setProgressMessage('¡Investigación completada!');
+      setTimeout(() => {
+        setIsLoading(false);
+        setIsRefreshing(false);
+      }, 500);
       console.log('♻️ Resultados cargados desde cache para:', topic);
       return;
     }
@@ -55,9 +63,16 @@ export default function ResearchPageContent() {
       setResults(results);
       setCategorizedResults(categorized);
       setCache(topic, { results, categorized, timestamp: Date.now() });
+      
+      // Completar progreso
+      setProgress(100);
+      setProgressMessage('¡Investigación completada exitosamente!');
+      setTimeout(() => {
+        setIsLoading(false);
+        setIsRefreshing(false);
+      }, 800);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al realizar la investigación');
-    } finally {
       setIsLoading(false);
       setIsRefreshing(false);
     }
@@ -71,6 +86,60 @@ export default function ResearchPageContent() {
 
     fetchResearch();
   }, [topic, router, fetchResearch]);
+
+  // Simular progreso de carga dinámico
+  useEffect(() => {
+    if (!isLoading && !isRefreshing) {
+      setProgress(0);
+      setProgressMessage('');
+      return;
+    }
+
+    let currentProgress = 0;
+    const progressSteps = [
+      { progress: 15, message: 'Conectando con fuentes de datos...', duration: 800 },
+      { progress: 25, message: 'Optimizando consulta de búsqueda...', duration: 600 },
+      { progress: 45, message: 'Buscando contenido relevante...', duration: 2000 },
+      { progress: 65, message: 'Analizando resultados encontrados...', duration: 1500 },
+      { progress: 85, message: 'Aplicando heurísticas de categorización...', duration: 1000 },
+      { progress: 95, message: 'Finalizando investigación...', duration: 500 },
+    ];
+
+    let stepIndex = 0;
+    
+    const updateProgress = () => {
+      if (stepIndex < progressSteps.length && (isLoading || isRefreshing)) {
+        const step = progressSteps[stepIndex];
+        setProgressMessage(step.message);
+        
+        // Incremento gradual hasta el siguiente paso
+        const targetProgress = step.progress;
+        const increment = (targetProgress - currentProgress) / 10;
+        
+        const gradualUpdate = () => {
+          if (currentProgress < targetProgress && (isLoading || isRefreshing)) {
+            currentProgress += increment;
+            setProgress(Math.min(currentProgress, targetProgress));
+            setTimeout(gradualUpdate, 100);
+          } else {
+            // Pasar al siguiente paso después de la duración especificada
+            setTimeout(() => {
+              stepIndex++;
+              updateProgress();
+            }, step.duration);
+          }
+        };
+        
+        gradualUpdate();
+      } else if (isLoading || isRefreshing) {
+        // Si llegamos al final pero aún estamos cargando, mantener en 95%
+        setProgress(95);
+        setProgressMessage('Preparando resultados...');
+      }
+    };
+
+    updateProgress();
+  }, [isLoading, isRefreshing]);
 
   const handleStartArticle = (result: CategorizedResult) => {
     const params = new URLSearchParams({
@@ -97,14 +166,47 @@ export default function ResearchPageContent() {
   if (isLoading) {
     return (
       <main className="min-h-screen bg-gradient-to-br from-blue-100 via-white to-purple-100 flex flex-col items-center justify-center p-4">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mx-auto mb-6"></div>
+        <div className="text-center max-w-md w-full">
+          {/* Barra de progreso */}
+          <div className="mb-6">
+            <div className="bg-gray-200 rounded-full h-3 w-full mb-2 overflow-hidden">
+              <div 
+                className="bg-gradient-to-r from-blue-500 to-blue-600 h-full rounded-full transition-all duration-300 ease-out"
+                style={{ width: `${progress}%` }}
+              ></div>
+            </div>
+            <div className="flex justify-between items-center text-sm text-gray-600">
+              <span>{Math.round(progress)}%</span>
+              <span className="text-blue-600 font-medium">Investigando...</span>
+            </div>
+          </div>
+          
           <h2 className="text-2xl font-semibold text-gray-800 mb-2">
             Investigando sobre {topic}
           </h2>
-          <p className="text-gray-600">
-            Obteniendo los mejores resultados de la web...
+          <p className="text-gray-600 mb-4">
+            {progressMessage || 'Iniciando investigación...'}
           </p>
+          
+          {/* Indicador visual adicional */}
+          <div className="flex justify-center space-x-1 mb-4">
+            {[...Array(3)].map((_, i) => (
+              <div
+                key={i}
+                className={`w-2 h-2 rounded-full transition-all duration-500 ${
+                  progress > (i + 1) * 25 ? 'bg-blue-500' : 'bg-gray-300'
+                }`}
+                style={{
+                  animationDelay: `${i * 0.2}s`,
+                  animation: progress > (i + 1) * 25 ? 'pulse 2s infinite' : 'none'
+                }}
+              ></div>
+            ))}
+          </div>
+          
+          <div className="text-xs text-gray-500">
+            Esto puede tomar algún tiempo, por favor, no cierre la página.
+          </div>
         </div>
       </main>
     );
