@@ -16,7 +16,14 @@ export async function performResearch(topic: string): Promise<CategorizedResult[
     return results;
   } catch (error) {
     console.error('Error en performResearch:', error);
-    throw new Error('Error al realizar la investigación. Por favor, intenta nuevamente.');
+    
+    // Manejo específico para errores de timeout
+    if (error instanceof Error && error.message.includes('Timeout')) {
+      throw new Error(`⏱️ ${error.message}`);
+    }
+    
+    // Error genérico para otros casos
+    throw new Error('❌ Error al realizar la investigación. Por favor, intenta nuevamente.');
   }
 }
 

@@ -111,17 +111,38 @@ export default function ResearchPageContent() {
   }
 
   if (error) {
+    const isTimeoutError = error.includes('Timeout');
+    
     return (
       <main className="min-h-screen bg-gradient-to-br from-blue-100 via-white to-purple-100 flex flex-col items-center justify-center p-4">
-        <div className="text-center max-w-md">
-          <div className="text-red-500 text-6xl mb-4">⚠️</div>
-          <h2 className="text-2xl font-semibold text-gray-800 mb-2">
-            Error en la investigación
+        <div className="text-center max-w-lg bg-white rounded-lg shadow-lg p-8">
+          <div className={`text-6xl mb-4 ${isTimeoutError ? 'text-yellow-500' : 'text-red-500'}`}>
+            {isTimeoutError ? '⏱️' : '⚠️'}
+          </div>
+          <h2 className="text-2xl font-semibold text-gray-800 mb-4">
+            {isTimeoutError ? 'Búsqueda demorada' : 'Error en la investigación'}
           </h2>
-          <p className="text-gray-600 mb-6">{error}</p>
-          <Link href="/investigation">
-            <Button variant="outline">Volver a intentar</Button>
-          </Link>
+          <div className="text-gray-600 mb-6 space-y-2">
+            <p className="font-medium">{error}</p>
+            {isTimeoutError && (
+              <div className="text-sm bg-yellow-50 border border-yellow-200 rounded p-3 mt-3">
+                <p className="font-medium text-yellow-800 mb-1">💡 Sugerencias:</p>
+                <ul className="text-left text-yellow-700 space-y-1">
+                  <li>• Intenta con un tema más específico</li>
+                  <li>• Verifica tu conexión a internet</li>
+                  <li>• Usa palabras clave más concretas</li>
+                </ul>
+              </div>
+            )}
+          </div>
+          <div className="flex gap-3 justify-center">
+            <Link href="/investigation">
+              <Button variant="outline">← Cambiar tema</Button>
+            </Link>
+            <Button onClick={() => fetchResearch(true)} disabled={isRefreshing}>
+              {isRefreshing ? '🔄 Intentando...' : '🔄 Reintentar'}
+            </Button>
+          </div>
         </div>
       </main>
     );

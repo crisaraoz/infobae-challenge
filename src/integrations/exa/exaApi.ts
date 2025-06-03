@@ -9,6 +9,32 @@ const getExaConfig = (): ExaConfig => ({
   baseUrl: process.env.EXA_API_BASE_URL || "",
 });
 
+// Timeout de 45 segundos
+const TIMEOUT_MS = 30000;
+
+/**
+ * Wrapper para fetch con timeout personalizado
+ */
+async function fetchWithTimeout(url: string, options: RequestInit, timeoutMs: number = TIMEOUT_MS): Promise<Response> {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    const response = await fetch(url, {
+      ...options,
+      signal: controller.signal,
+    });
+    clearTimeout(timeoutId);
+    return response;
+  } catch (error: unknown) {
+    clearTimeout(timeoutId);
+    if (error instanceof Error && error.name === 'AbortError') {
+      throw new Error(`Timeout: La búsqueda tardó más de ${timeoutMs / 1000} segundos. Por favor, intenta con un tema más específico.`);
+    }
+    throw error;
+  }
+}
+
 // ==========================================
 // FUNCIONES DE API EXA
 // ==========================================
@@ -48,7 +74,7 @@ export async function searchExaContent(
   };
 
   try {
-    const response = await fetch(`${config.baseUrl}/search`, {
+    const response = await fetchWithTimeout(`${config.baseUrl}/search`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${config.apiKey}`,
@@ -92,7 +118,7 @@ export async function getExaContents(
       text: true,
     };
 
-    const response = await fetch(`${config.baseUrl}/contents`, {
+    const response = await fetchWithTimeout(`${config.baseUrl}/contents`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${config.apiKey}`,

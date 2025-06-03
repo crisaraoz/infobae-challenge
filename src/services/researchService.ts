@@ -10,7 +10,7 @@ export async function fetchResearchResults(topic: string): Promise<CategorizedRe
   try {
     const categorizedResults = await searchAndProcessContent(topic, {
       numResults: 20,
-      daysBack: 15 // Buscar en los últimos 30 días
+      daysBack: 15 // Buscar en los últimos 15 días
     });
     
     if (!categorizedResults.length) {
@@ -20,7 +20,14 @@ export async function fetchResearchResults(topic: string): Promise<CategorizedRe
     return categorizedResults;
   } catch (error) {
     console.error('Error detallado:', error);
-    // Retornar datos mock en caso de error
+    
+    // Si es un error de timeout, propagarlo para que se muestre al usuario
+    if (error instanceof Error && error.message.includes('Timeout')) {
+      throw error;
+    }
+    
+    // Para otros errores, usar datos mock
+    console.warn('Usando datos mock debido a error en la API');
     return getMockResults(topic);
   }
 } 

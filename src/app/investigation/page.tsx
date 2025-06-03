@@ -44,7 +44,7 @@ const predefinedTopics = [
   },
   {
     id: 'politics',
-    title: 'Política',
+    title: 'Política Argentina',
     description: 'Análisis de la situación política nacional y global',
     icon: '🏛️',
     iconLucide: Building,
@@ -234,7 +234,7 @@ function InvestigationPageContent() {
         <div className="mb-12">
           <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
             Infobae AI Challenge
-          </h1>
+      </h1>
           <p className="text-lg md:text-xl text-gray-600 max-w-2xl mx-auto">
             Inicia una investigación profunda sobre cualquier tema utilizando 
             inteligencia artificial avanzada
@@ -364,14 +364,14 @@ function InvestigationPageContent() {
                           }}
                           className="flex-1"
                         />
-                        <Button 
+        <Button
                           onClick={handleCustomTopicSubmit}
                           disabled={!customTopic.trim()}
                           className="px-4"
                         >
                           <Search className="h-4 w-4 mr-2" />
                           Investigar
-                        </Button>
+        </Button>
                       </div>
                       
                       <div className="text-sm text-gray-500">

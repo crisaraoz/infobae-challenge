@@ -19,16 +19,18 @@ export async function POST(req: Request) {
     const result = await generateObject({
       model: openai('gpt-4-turbo'), // Or your preferred model
       schema: z.object({
-        titles: z.array(z.string()).length(numTitles).describe(`Array of ${numTitles} compelling and SEO-friendly titles for an article.`)
+        titles: z.array(z.string()).length(numTitles).describe(`Array de ${numTitles} títulos atractivos y optimizados para SEO en español.`)
       }),
-      prompt: `Based on the following article content, generate ${numTitles} unique, compelling, and SEO-friendly titles. Each title should accurately reflect the core subject of the article. Focus on clarity, conciseness, and reader engagement. Avoid generic titles.
+      prompt: `Basándote en el siguiente contenido de artículo, genera ${numTitles} títulos únicos, atractivos y optimizados para SEO en español. Cada título debe reflejar con precisión el tema central del artículo. Enfócate en la claridad, concisión y el engagement del lector. Evita títulos genéricos.
 
-Article Content:
+IMPORTANTE: Los títulos deben estar completamente en español, ser periodísticos y profesionales.
+
+Contenido del Artículo:
 ---
 ${articleContent}
 ---
 
-Generate exactly ${numTitles} titles.
+Genera exactamente ${numTitles} títulos en español.
 `,
       temperature: 0.7,
       maxTokens: 200 * numTitles, // Estimate tokens needed
