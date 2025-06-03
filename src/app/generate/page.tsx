@@ -15,9 +15,12 @@ export default function GeneratePage() {
   const [url, setUrl] = useState('');
   const [prompt, setPrompt] = useState('');
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [generatedArticle, setGeneratedArticle] = useState('');
   const [activeTab, setActiveTab] = useState('url');
   const [error, setError] = useState<string | null>(null);
+  const [isGeneratingFromImage, setIsGeneratingFromImage] = useState(false);
+  const [isDragOver, setIsDragOver] = useState(false);
 
   const { messages, append, isLoading } = useChat({
     api: '/api/chat',
@@ -35,6 +38,7 @@ export default function GeneratePage() {
     if (!url) return;
     
     setError(null); // Limpiar errores anteriores
+    setGeneratedArticle(''); // Limpiar artículo anterior
     
     const customPrompt = prompt || 'Genera un artículo periodístico completo basado en el contenido de esta URL.';
     
@@ -73,6 +77,8 @@ URL a analizar: ${url}
     if (!selectedImage) return;
     
     setError(null); // Limpiar errores anteriores
+    setGeneratedArticle(''); // Limpiar artículo anterior
+    setIsGeneratingFromImage(true); // Activar loading state
     
     const formData = new FormData();
     formData.append('image', selectedImage);
@@ -100,6 +106,8 @@ URL a analizar: ${url}
       console.error('Error:', error);
       setError('Error al generar el artículo desde la imagen.');
       setGeneratedArticle('');
+    } finally {
+      setIsGeneratingFromImage(false); // Desactivar loading state
     }
   };
 
@@ -108,6 +116,53 @@ URL a analizar: ${url}
     if (file) {
       setSelectedImage(file);
       setError(null); // Limpiar errores al subir nueva imagen
+      
+      // Crear preview de la imagen
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setImagePreview(e.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleFileSelect = (file: File) => {
+    setSelectedImage(file);
+    setError(null);
+    
+    // Crear preview de la imagen
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      setImagePreview(e.target?.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(false);
+    
+    const files = e.dataTransfer.files;
+    if (files.length > 0) {
+      const file = files[0];
+      if (file.type.startsWith('image/')) {
+        handleFileSelect(file);
+      } else {
+        setError('Por favor, selecciona solo archivos de imagen.');
+      }
     }
   };
 
@@ -251,7 +306,16 @@ URL a analizar: ${url}
                     <label className="text-sm font-medium text-gray-700 mb-2 block">
                       Subir imagen
                     </label>
-                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+                    <div 
+                      className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
+                        isDragOver 
+                          ? 'border-blue-400 bg-blue-50' 
+                          : 'border-gray-300 hover:border-gray-400'
+                      }`}
+                      onDragOver={handleDragOver}
+                      onDragLeave={handleDragLeave}
+                      onDrop={handleDrop}
+                    >
                       <input
                         type="file"
                         accept="image/*"
@@ -259,24 +323,48 @@ URL a analizar: ${url}
                         className="hidden"
                         id="image-upload"
                       />
-                      <label htmlFor="image-upload" className="cursor-pointer">
-                        <Upload className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-                        <p className="text-gray-600">
-                          Haz clic para subir una imagen o arrastra y suelta
-                        </p>
-                        <p className="text-sm text-gray-500 mt-2">
-                          PNG, JPG, GIF hasta 10MB
-                        </p>
-                      </label>
+                      
+                      {!selectedImage ? (
+                        <label htmlFor="image-upload" className="cursor-pointer">
+                          <Upload className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+                          <p className="text-gray-600">
+                            Haz clic para subir una imagen o arrastra y suelta
+                          </p>
+                          <p className="text-sm text-gray-500 mt-2">
+                            PNG, JPG, GIF hasta 10MB
+                          </p>
+                        </label>
+                      ) : (
+                        <div className="space-y-4">
+                          {/* Previsualización de la imagen */}
+                          <div className="flex flex-col items-center">
+                            <div className="relative">
+                              <img 
+                                src={imagePreview || undefined}
+                                alt="Preview"
+                                className="max-w-full max-h-48 object-contain rounded-lg shadow-md"
+                              />
+                            </div>
+                            <div className="mt-3 text-center">
+                              <Badge variant="secondary" className="mb-2">
+                                {selectedImage.name}
+                              </Badge>
+                              <p className="text-sm text-gray-500">
+                                {(selectedImage.size / 1024 / 1024).toFixed(2)} MB
+                              </p>
+                            </div>
+                          </div>
+                          
+                          {/* Botón para cambiar imagen */}
+                          <label htmlFor="image-upload" className="cursor-pointer">
+                            <div className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                              <Upload className="h-4 w-4 mr-2" />
+                              Cambiar imagen
+                            </div>
+                          </label>
+                        </div>
+                      )}
                     </div>
-                    
-                    {selectedImage && (
-                      <div className="flex items-center gap-2 p-2 bg-green-50 rounded-lg">
-                        <Badge variant="secondary">
-                          {selectedImage.name}
-                        </Badge>
-                      </div>
-                    )}
                   </div>
                   
                   <div>
@@ -293,11 +381,20 @@ URL a analizar: ${url}
                   
                   <Button 
                     onClick={handleGenerateFromImage}
-                    disabled={!selectedImage}
+                    disabled={!selectedImage || isGeneratingFromImage}
                     className="w-full"
                   >
-                    <Image className="mr-2 h-4 w-4" />
-                    Generar desde Imagen
+                    {isGeneratingFromImage ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Generando...
+                      </>
+                    ) : (
+                      <>
+                        <Image className="mr-2 h-4 w-4" />
+                        Generar desde Imagen
+                      </>
+                    )}
                   </Button>
                 </TabsContent>
               </Tabs>
@@ -313,17 +410,22 @@ URL a analizar: ${url}
               </CardDescription>
             </CardHeader>
             <CardContent>
-              {isLoading && (
+              {(isLoading || isGeneratingFromImage) && (
                 <div className="flex items-center justify-center py-12">
                   <div className="text-center">
                     <Loader2 className="mx-auto h-8 w-8 animate-spin text-blue-600 mb-4" />
-                    <p className="text-gray-600">Generando artículo...</p>
+                    <p className="text-gray-600">
+                      {isLoading ? 'Analizando URL y generando artículo...' : 'Analizando imagen y generando artículo...'}
+                    </p>
+                    <p className="text-sm text-gray-500 mt-2">
+                      Esto puede tomar algunos segundos
+                    </p>
                   </div>
                 </div>
               )}
 
               {/* Mostrar mensajes de useChat */}
-              {messages.map((message, index) => (
+              {!isLoading && !isGeneratingFromImage && messages.map((message, index) => (
                 <div key={index} className="mb-4">
                   {message.role === 'assistant' && (
                     <div className="prose max-w-none">
@@ -334,13 +436,13 @@ URL a analizar: ${url}
               ))}
 
               {/* Mostrar artículo generado de imagen */}
-              {generatedArticle && activeTab === 'image' && (
+              {!isGeneratingFromImage && generatedArticle && activeTab === 'image' && (
                 <div className="prose max-w-none">
                   {formatArticle(generatedArticle)}
                 </div>
               )}
 
-              {!isLoading && !generatedArticle && messages.length === 0 && !error && (
+              {!isLoading && !isGeneratingFromImage && !generatedArticle && messages.length === 0 && !error && (
                 <div className="text-center py-12 text-gray-500">
                   <FileText className="mx-auto h-12 w-12 text-gray-300 mb-4" />
                   <p>El artículo generado aparecerá aquí</p>
