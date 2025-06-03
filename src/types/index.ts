@@ -10,6 +10,17 @@ export interface ExaSearchResult {
   highlightScores?: number[];
 }
 
+export interface SearchOptions {
+  numResults?: number;
+  includeDomains?: string[];
+  excludeDomains?: string[];
+  daysBack?: number;
+}
+
+export interface ExaConfig {
+  apiKey: string;
+  baseUrl: string;
+}
 export interface ExaSearchResponse {
   results: ExaSearchResult[];
   autopromptString?: string;

@@ -1,31 +1,29 @@
 'use server';
 
-import { fetchResearchResults } from '@/services/exaService';
 import { CategorizedResult } from '@/types';
+import { fetchResearchResults } from '@/services/researchService';
 
-export async function performResearch(topic: string): Promise<{
-  success: boolean;
-  results?: CategorizedResult[];
-  error?: string;
-}> {
+/**
+ * Acción del servidor para realizar investigación sobre un tema específico
+ */
+export async function performResearch(topic: string): Promise<CategorizedResult[]> {
+  if (!topic.trim()) {
+    throw new Error('El tema de investigación no puede estar vacío');
+  }
+
   try {
-    console.log(`Iniciando investigación para el tema: ${topic}`);
-    
     const results = await fetchResearchResults(topic);
-    
-    console.log(`Investigación completada. ${results.length} resultados encontrados`);
-    
-    return {
-      success: true,
-      results: results
-    };
+    return results;
   } catch (error) {
     console.error('Error en performResearch:', error);
     
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : 'Error desconocido durante la investigación'
-    };
+    // Manejo específico para errores de timeout
+    if (error instanceof Error && error.message.includes('Timeout')) {
+      throw new Error(`⏱️ ${error.message.replace('45 segundos', '30 segundos')}`);
+    }
+    
+    // Error genérico para otros casos
+    throw new Error('❌ Error al realizar la investigación. Por favor, intenta nuevamente.');
   }
 }
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -44,7 +44,7 @@ const predefinedTopics = [
   },
   {
     id: 'politics',
-    title: 'Política',
+    title: 'Política Argentina',
     description: 'Análisis de la situación política nacional y global',
     icon: '🏛️',
     iconLucide: Building,
@@ -80,7 +80,7 @@ const predefinedTopics = [
   },
 ];
 
-export default function InvestigationPage() {
+function InvestigationPageContent() {
   const [showTopics, setShowTopics] = useState(false);
   const [selectedTopic, setSelectedTopic] = useState<string | null>(null);
   const [customTopic, setCustomTopic] = useState('');
@@ -234,7 +234,7 @@ export default function InvestigationPage() {
         <div className="mb-12">
           <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
             Infobae AI Challenge
-          </h1>
+      </h1>
           <p className="text-lg md:text-xl text-gray-600 max-w-2xl mx-auto">
             Inicia una investigación profunda sobre cualquier tema utilizando 
             inteligencia artificial avanzada
@@ -364,14 +364,14 @@ export default function InvestigationPage() {
                           }}
                           className="flex-1"
                         />
-                        <Button 
+        <Button
                           onClick={handleCustomTopicSubmit}
                           disabled={!customTopic.trim()}
                           className="px-4"
                         >
                           <Search className="h-4 w-4 mr-2" />
                           Investigar
-                        </Button>
+        </Button>
                       </div>
                       
                       <div className="text-sm text-gray-500">
@@ -410,5 +410,18 @@ export default function InvestigationPage() {
         </div>
       </div>
     </main>
+  );
+}
+
+export default function InvestigationPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-gradient-to-br from-blue-100 via-white to-purple-100 flex items-center justify-center">
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+        <p className="text-gray-600">Cargando página de investigación...</p>
+      </div>
+    </div>}>
+      <InvestigationPageContent />
+    </Suspense>
   );
 }
