@@ -1,4 +1,4 @@
-import { CategorizedResult } from '@/types';
+import type { CategorizedResult, CustomCategorizationRules } from '@/types';
 import { searchAndProcessContent } from '@/analysis/contentProcessor';
 import { getMockResults } from '@/lib/mocks';
 
@@ -6,12 +6,15 @@ import { getMockResults } from '@/lib/mocks';
 // SERVICIO PRINCIPAL DE INVESTIGACIÓN
 // ==========================================
 
-export async function fetchResearchResults(topic: string): Promise<CategorizedResult[]> {
+export async function fetchResearchResults(
+  topic: string, 
+  customRules?: CustomCategorizationRules
+): Promise<CategorizedResult[]> {
   try {
     const categorizedResults = await searchAndProcessContent(topic, {
       numResults: 20,
       daysBack: 15 // Buscar en los últimos 15 días
-    });
+    }, customRules);
     
     if (!categorizedResults.length) {
       return getMockResults(topic);

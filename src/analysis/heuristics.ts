@@ -1,4 +1,5 @@
-import { ExaSearchResult } from '@/types';
+import type { ExaSearchResult } from '@/types';
+import type { CustomCategorizationRules } from '@/types';
 
 // ==========================================
 // ANÁLISIS SIMPLIFICADO DE CONTENIDO
@@ -36,29 +37,46 @@ function analyzeTopicRelevance(content: string, title: string, topic: string): n
 }
 
 /**
- * Análisis de calidad básica del contenido
+ * Análisis de calidad básica del contenido con reglas personalizables
  */
-function analyzeContentQuality(content: string, url: string): number {
+function analyzeContentQuality(
+  content: string, 
+  url: string, 
+  rules?: CustomCategorizationRules
+): number {
   let qualityScore = 85; // Base muy alto para mostrar porcentajes altos
+  
+  // Usar reglas personalizadas o valores por defecto
+  const minWordCount = rules?.thresholds.minWordCount || 100;
+  const preferredDomains = rules?.qualityFactors.preferredDomains || [
+    'coindesk', 'reuters.com', 'bbc.com', 'elpais.com', 'expansion.com',
+    '.edu', '.gov', 'marca.com', 'espn.com'
+  ];
+  const keywordBonus = rules?.qualityFactors.keywordBonus || [
+    'estadística', 'datos', 'cifra', 'estudio', 'investigación'
+  ];
   
   // Longitud del contenido
   const wordCount = content.split(/\s+/).length;
-  if (wordCount > 500) qualityScore += 8;
-  else if (wordCount > 200) qualityScore += 6;
-  else if (wordCount > 100) qualityScore += 4;
-  else if (wordCount > 50) qualityScore += 2;
+  if (wordCount > minWordCount * 5) qualityScore += 8;
+  else if (wordCount > minWordCount * 2) qualityScore += 6;
+  else if (wordCount > minWordCount) qualityScore += 4;
+  else if (wordCount > minWordCount * 0.5) qualityScore += 2;
   
-  // Presencia de datos/números
-  if (/\d+[%$€]?|\d+\.\d+|estadística|datos|cifra|estudio|investigación/i.test(content)) {
+  // Presencia de datos/números con keywords personalizables
+  const keywordPattern = keywordBonus.join('|');
+  const dataPattern = new RegExp(`\\d+[%$€]?|\\d+\\.\\d+|${keywordPattern}`, 'i');
+  if (dataPattern.test(content)) {
     qualityScore += 4;
   }
   
-  // Fuentes confiables
+  // Fuentes confiables personalizables
   const domain = url.toLowerCase();
-  if (domain.includes('coindesk') || domain.includes('reuters.com') || domain.includes('bbc.com') || 
-      domain.includes('elpais.com') || domain.includes('expansion.com') ||
-      domain.includes('.edu') || domain.includes('.gov') ||
-      domain.includes('marca.com') || domain.includes('espn.com')) {
+  const isDomainPreferred = preferredDomains.some(preferredDomain => 
+    domain.includes(preferredDomain.toLowerCase())
+  );
+  
+  if (isDomainPreferred) {
     qualityScore += 3;
   }
   
@@ -66,56 +84,107 @@ function analyzeContentQuality(content: string, url: string): number {
 }
 
 /**
- * Análisis de frescura simplificado
+ * Análisis de frescura simplificado con reglas personalizables
  */
-function analyzeFreshness(publishedDate: string | null): number {
+function analyzeFreshness(publishedDate: string | null, rules?: CustomCategorizationRules): number {
   if (!publishedDate) return 85; // Alto para mostrar porcentajes altos
   
+  const maxDaysForFresh = rules?.thresholds.maxDaysForFresh || 30;
   const daysSince = (Date.now() - new Date(publishedDate).getTime()) / (1000 * 60 * 60 * 24);
   
-  if (daysSince <= 7) return 98;   // Última semana
-  if (daysSince <= 30) return 95;   // Último mes  
-  if (daysSince <= 90) return 90;   // 3 meses
-  if (daysSince <= 365) return 85;  // 1 año
-  return 80;                        // Más viejo
+  if (daysSince <= maxDaysForFresh * 0.25) return 98;   // Muy reciente
+  if (daysSince <= maxDaysForFresh) return 95;          // Dentro del rango
+  if (daysSince <= maxDaysForFresh * 3) return 90;      // Moderadamente viejo
+  if (daysSince <= maxDaysForFresh * 12) return 85;     // Viejo pero aceptable
+  return 80;                                            // Muy viejo
 }
 
 // ==========================================
-// CATEGORIZACIÓN PRINCIPAL SIMPLIFICADA
+// CATEGORIZACIÓN PRINCIPAL CON REGLAS PERSONALIZABLES
 // ==========================================
 
-export function categorizeResult(result: ExaSearchResult, topic: string): { 
+export function categorizeResult(
+  result: ExaSearchResult, 
+  topic: string,
+  customRules?: CustomCategorizationRules
+): { 
   category: 'expand' | 'not_expand', 
   finalScore: number, 
-  reasoning: string 
+  reasoning: string,
+  breakdown?: {
+    relevance: number;
+    quality: number;
+    freshness: number;
+    exaScore: number;
+  }
 } {
+  // Usar reglas personalizadas o valores por defecto
+  const weights = customRules?.weights || {
+    relevance: 50,
+    quality: 25,
+    freshness: 20,
+    exaScore: 5
+  };
+  
+  const threshold = customRules?.thresholds.expandThreshold || 85;
+  
   // Calcular scores individuales (0-100)
   const relevanceScore = analyzeTopicRelevance(result.text || '', result.title, topic);
-  const qualityScore = analyzeContentQuality(result.text || '', result.url);
-  const freshnessScore = analyzeFreshness(result.publishedDate || null);
+  const qualityScore = analyzeContentQuality(result.text || '', result.url, customRules);
+  const freshnessScore = analyzeFreshness(result.publishedDate || null, customRules);
   const exaScore = (result.score || 0) * 100; // Convertir a 0-100
   
-  // Promedio ponderado directo
+  // Normalizar pesos para que sumen 100
+  const totalWeight = weights.relevance + weights.quality + weights.freshness + weights.exaScore;
+  const normalizedWeights = {
+    relevance: weights.relevance / totalWeight,
+    quality: weights.quality / totalWeight,
+    freshness: weights.freshness / totalWeight,
+    exaScore: weights.exaScore / totalWeight
+  };
+  
+  // Promedio ponderado con pesos personalizados
   const finalScore = (
-    relevanceScore * 0.50 +   // 50% relevancia (más peso)
-    qualityScore * 0.25 +     // 25% calidad del contenido  
-    freshnessScore * 0.20 +   // 20% frescura
-    exaScore * 0.05           // 5% score de Exa
+    relevanceScore * normalizedWeights.relevance +
+    qualityScore * normalizedWeights.quality +
+    freshnessScore * normalizedWeights.freshness +
+    exaScore * normalizedWeights.exaScore
   );
   
   // El score final es directamente el que se muestra (0-100)
   const normalizedScore = Math.round(finalScore);
   
-  // Threshold ajustado para la nueva escala: 85 puntos para expandir
-  const threshold = 85;
+  // Usar threshold personalizado
   const category = normalizedScore >= threshold ? 'expand' : 'not_expand';
   
-  // Generar reasoning basado en scores individuales
+  // Generar reasoning basado en scores individuales y pesos
   const reasons: string[] = [];
-  if (relevanceScore >= 85) reasons.push('Alta relevancia temática');
-  if (qualityScore >= 90) reasons.push('Buena calidad de contenido');
-  if (freshnessScore >= 95) reasons.push('Contenido reciente');
-  if (exaScore >= 40) reasons.push('Score de búsqueda alto');
+  const highestWeight = Math.max(
+    normalizedWeights.relevance,
+    normalizedWeights.quality,
+    normalizedWeights.freshness,
+    normalizedWeights.exaScore
+  );
+  
+  if (normalizedWeights.relevance === highestWeight && relevanceScore >= 85) {
+    reasons.push('Alta relevancia temática (factor principal)');
+  }
+  if (normalizedWeights.quality === highestWeight && qualityScore >= 90) {
+    reasons.push('Excelente calidad de contenido (factor principal)');
+  }
+  if (normalizedWeights.freshness === highestWeight && freshnessScore >= 95) {
+    reasons.push('Contenido muy reciente (factor principal)');
+  }
+  if (normalizedWeights.exaScore === highestWeight && exaScore >= 40) {
+    reasons.push('Alto score de búsqueda (factor principal)');
+  }
+  
+  // Agregar razones adicionales
+  if (reasons.length === 0) {
+    if (relevanceScore >= 85) reasons.push('Buena relevancia temática');
+    if (qualityScore >= 90) reasons.push('Calidad aceptable');
+    if (freshnessScore >= 95) reasons.push('Contenido reciente');
+  }
   
   const reasoning = reasons.length > 0 ? 
     reasons.join(' • ') : 
@@ -124,6 +193,12 @@ export function categorizeResult(result: ExaSearchResult, topic: string): {
   return { 
     category, 
     finalScore: normalizedScore / 100, // Convertir de vuelta a 0-1 para compatibilidad
-    reasoning 
+    reasoning,
+    breakdown: {
+      relevance: relevanceScore,
+      quality: qualityScore,
+      freshness: freshnessScore,
+      exaScore: exaScore
+    }
   };
 } 

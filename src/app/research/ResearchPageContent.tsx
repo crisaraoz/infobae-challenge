@@ -4,9 +4,11 @@ import { useState, useEffect, useCallback } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { performResearch, categorizeResearchResults } from '@/app/actions/research';
-import type { CategorizedResult } from '@/types';
+import type { CategorizedResult, CustomCategorizationRules } from '@/types';
 import { useResearchCache } from '@/hooks/useResearchCache';
-import { RefreshCw } from 'lucide-react';
+import { useCategorizationRules } from '@/hooks/useCategorizationRules';
+import { CategorizationRulesConfig } from '@/components/CategorizationRulesConfig';
+import { RefreshCw, Settings } from 'lucide-react';
 import Link from 'next/link';
 
 export default function ResearchPageContent() {
@@ -14,6 +16,7 @@ export default function ResearchPageContent() {
   const router = useRouter();
   const topic = searchParams.get('topic');
   const { getCache, setCache, clearCache } = useResearchCache();
+  const { activeRule } = useCategorizationRules();
 
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -28,8 +31,9 @@ export default function ResearchPageContent() {
     notExpandWorthy: []
   });
   const [error, setError] = useState<string | null>(null);
+  const [showConfigModal, setShowConfigModal] = useState(false);
 
-  const fetchResearch = useCallback(async (forceRefresh: boolean = false) => {
+  const fetchResearch = useCallback(async (forceRefresh: boolean = false, customRules?: CustomCategorizationRules) => {
     if (!topic) return;
     
     setIsLoading(!forceRefresh);
@@ -43,7 +47,7 @@ export default function ResearchPageContent() {
     }
 
     const cachedData = getCache(topic);
-    if (cachedData && !forceRefresh) {
+    if (cachedData && !forceRefresh && !customRules) {
       setResults(cachedData.results);
       setCategorizedResults(cachedData.categorized);
       setProgress(100);
@@ -52,17 +56,22 @@ export default function ResearchPageContent() {
         setIsLoading(false);
         setIsRefreshing(false);
       }, 500);
-      console.log('♻️ Resultados cargados desde cache para:', topic);
       return;
     }
 
     try {
-      console.log('🌐 Realizando nueva investigación para:', topic);
-      const results = await performResearch(topic);
+      // Usar reglas personalizadas o reglas activas
+      const rulesToUse = customRules || activeRule;
+      
+      const results = await performResearch(topic, rulesToUse);
       const categorized = await categorizeResearchResults(results);
       setResults(results);
       setCategorizedResults(categorized);
-      setCache(topic, { results, categorized, timestamp: Date.now() });
+      
+      // Solo cachear si no se usan reglas personalizadas temporales
+      if (!customRules) {
+        setCache(topic, { results, categorized, timestamp: Date.now() });
+      }
       
       // Completar progreso
       setProgress(100);
@@ -76,7 +85,12 @@ export default function ResearchPageContent() {
       setIsLoading(false);
       setIsRefreshing(false);
     }
-  }, [topic, clearCache, getCache, setCache]);
+  }, [topic, clearCache, getCache, setCache, activeRule]);
+
+  const handleRulesChange = (newRules: CustomCategorizationRules) => {
+    // Reejecutar la investigación con las nuevas reglas
+    fetchResearch(true, newRules);
+  };
 
   useEffect(() => {
     if (!topic) {
@@ -262,15 +276,26 @@ export default function ResearchPageContent() {
               </Button>
             </Link>
             
-            <Button 
-              onClick={handleRefreshInvestigation}
-              disabled={isRefreshing}
-              variant="outline"
-              className="flex items-center gap-2"
-            >
-              <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-              {isRefreshing ? 'Actualizando...' : 'Nueva Investigación'}
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button 
+                onClick={() => setShowConfigModal(true)}
+                variant="outline"
+                className="flex items-center gap-2"
+              >
+                <Settings className="h-4 w-4" />
+                Configurar Reglas
+              </Button>
+              
+              <Button 
+                onClick={handleRefreshInvestigation}
+                disabled={isRefreshing}
+                variant="outline"
+                className="flex items-center gap-2"
+              >
+                <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+                {isRefreshing ? 'Actualizando...' : 'Nueva Investigación'}
+              </Button>
+            </div>
           </div>
           
           <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
@@ -391,6 +416,13 @@ export default function ResearchPageContent() {
           </div>
         )}
       </div>
+
+      {/* Modal de configuración de reglas */}
+      <CategorizationRulesConfig
+        isOpen={showConfigModal}
+        onClose={() => setShowConfigModal(false)}
+        onRulesChange={handleRulesChange}
+      />
     </main>
   );
 } 
