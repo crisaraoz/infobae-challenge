@@ -41,6 +41,10 @@ export default function ResearchPageContent() {
   const [expandWorthyExpanded, setExpandWorthyExpanded] = useState(true);
   const [notExpandWorthyExpanded, setNotExpandWorthyExpanded] = useState(true);
 
+  // Forzar vista de lista en móvil
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+  const effectiveViewMode = isMobile ? 'list' : viewMode;
+
   const fetchResearch = useCallback(async (forceRefresh: boolean = false, customRules?: CustomCategorizationRules) => {
     if (!topic) return;
     
@@ -235,11 +239,11 @@ export default function ResearchPageContent() {
   };
 
   const renderResultCard = (result: CategorizedResult, index: number, isExpandWorthy: boolean) => (
-    <div key={index} className={`bg-white rounded-lg p-6 shadow-lg border-l-4 ${isExpandWorthy ? 'border-green-400' : 'border-gray-400'} ${!isExpandWorthy ? 'opacity-75' : ''}`}>
-      <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2">
+    <div key={index} className={`bg-white rounded-lg p-4 md:p-6 shadow-lg border-l-4 ${isExpandWorthy ? 'border-green-400' : 'border-gray-400'} ${!isExpandWorthy ? 'opacity-75' : ''}`}>
+      <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2 text-sm md:text-base leading-tight">
         {result.title}
       </h3>
-      <p className="text-sm text-gray-600 mb-2">
+      <p className="text-xs md:text-sm text-gray-600 mb-3 line-clamp-3">
         {result.reasoning}
       </p>
       {result.score && (
@@ -247,12 +251,13 @@ export default function ResearchPageContent() {
           Puntuación: {Math.round(result.score * 100)}%
         </div>
       )}
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center space-y-3 sm:space-y-0">
         <a
           href={result.url}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-blue-600 hover:underline text-sm truncate flex-1 mr-4"
+          className="text-blue-600 hover:underline text-xs md:text-sm truncate block"
+          title={result.url}
         >
           {result.url}
         </a>
@@ -260,7 +265,7 @@ export default function ResearchPageContent() {
           <Button
             onClick={() => handleStartArticle(result)}
             size="sm"
-            className="bg-green-600 hover:bg-green-700"
+            className="bg-green-600 hover:bg-green-700 w-full sm:w-auto h-10 sm:h-auto"
           >
             Crear Artículo
           </Button>
@@ -270,31 +275,31 @@ export default function ResearchPageContent() {
   );
 
   const renderResultListItem = (result: CategorizedResult, index: number, isExpandWorthy: boolean) => (
-    <div key={index} className={`bg-white rounded-lg border p-4 hover:shadow-md transition-shadow ${isExpandWorthy ? 'border-l-4 border-l-green-400' : 'border-l-4 border-l-gray-400'} ${!isExpandWorthy ? 'opacity-75' : ''}`}>
+    <div key={index} className={`bg-white rounded-lg border p-3 md:p-4 hover:shadow-md transition-shadow ${isExpandWorthy ? 'border-l-4 border-l-green-400' : 'border-l-4 border-l-gray-400'} ${!isExpandWorthy ? 'opacity-75' : ''}`}>
       <div className="flex items-start justify-between">
         <div className="flex-1 min-w-0">
-          <div className="flex items-start gap-3">
-            <div className={`flex-shrink-0 w-2 h-2 rounded-full mt-2 ${isExpandWorthy ? 'bg-green-500' : 'bg-gray-400'}`}></div>
+          <div className="flex items-start gap-2 md:gap-3">
+            <div className={`flex-shrink-0 w-2 h-2 rounded-full mt-1.5 md:mt-2 ${isExpandWorthy ? 'bg-green-500' : 'bg-gray-400'}`}></div>
             <div className="flex-1 min-w-0">
-              <h3 className="font-semibold text-gray-900 mb-1 line-clamp-2">
+              <h3 className="font-semibold text-gray-900 mb-1 line-clamp-2 text-sm md:text-base leading-tight">
                 {result.title}
               </h3>
-              <p className="text-sm text-gray-600 mb-2 line-clamp-2">
+              <p className="text-xs md:text-sm text-gray-600 mb-2 line-clamp-2">
                 {result.reasoning}
               </p>
-              <div className="flex items-center gap-4 text-xs text-gray-500">
+              <div className="flex flex-wrap items-center gap-2 md:gap-4 text-xs text-gray-500">
                 {result.score && (
-                  <span className="flex items-center gap-1">
+                  <span className="flex items-center gap-1 bg-gray-100 px-2 py-1 rounded">
                     📊 {Math.round(result.score * 100)}%
                   </span>
                 )}
                 {result.author && (
-                  <span className="flex items-center gap-1">
+                  <span className="flex items-center gap-1 bg-gray-100 px-2 py-1 rounded">
                     👤 {result.author}
                   </span>
                 )}
                 {result.publishedDate && (
-                  <span className="flex items-center gap-1">
+                  <span className="flex items-center gap-1 bg-gray-100 px-2 py-1 rounded">
                     📅 {new Date(result.publishedDate).toLocaleDateString('es-ES')}
                   </span>
                 )}
@@ -302,12 +307,12 @@ export default function ResearchPageContent() {
             </div>
           </div>
         </div>
-        <div className="flex items-center gap-2 ml-4 flex-shrink-0">
+        <div className="flex flex-col sm:flex-row items-center gap-2 ml-2 md:ml-4 flex-shrink-0">
           <a
             href={result.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-blue-600 hover:text-blue-800 p-1"
+            className="text-blue-600 hover:text-blue-800 p-2 hover:bg-blue-50 rounded"
             title="Abrir enlace"
           >
             <ExternalLink className="h-4 w-4" />
@@ -316,10 +321,11 @@ export default function ResearchPageContent() {
             <Button
               onClick={() => handleStartArticle(result)}
               size="sm"
-              className="bg-green-600 hover:bg-green-700 text-xs px-3 py-1 h-7"
+              className="bg-green-600 hover:bg-green-700 text-xs px-2 md:px-3 py-2 h-8 md:h-7"
             >
               <ChevronRight className="h-3 w-3 mr-1" />
-              Artículo
+              <span className="hidden sm:inline">Artículo</span>
+              <span className="sm:hidden">📄</span>
             </Button>
           )}
         </div>
@@ -419,151 +425,275 @@ export default function ResearchPageContent() {
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-blue-100 via-white to-purple-100 p-4">
+    <main className="min-h-screen bg-gradient-to-br from-blue-100 via-white to-purple-100 p-3 md:p-4">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="text-center mb-8">
-          <div className="flex justify-between items-center mb-4">
-            <Link href="/investigation?show=topics">
-              <Button variant="outline">
-                ← Volver a investigación
-              </Button>
-            </Link>
+        <div className="text-center mb-6 md:mb-8">
+          {/* Mobile Header Layout */}
+          <div className="block md:hidden space-y-4 mb-6">
+            {/* Back Button */}
+            <div className="flex justify-start">
+              <Link href="/investigation?show=topics">
+                <Button variant="outline" size="sm" className="flex items-center gap-2">
+                  ← Volver a investigación
+                </Button>
+              </Link>
+            </div>
             
-            <div className="flex items-center gap-2">
-              {/* Controles de vista */}
-              <div className="flex items-center space-x-2 bg-white rounded-lg p-1 shadow-sm border">
-                <Button
-                  variant={viewMode === 'cards' ? 'default' : 'ghost'}
-                  size="sm"
-                  onClick={() => setViewMode('cards')}
-                  className="h-8 w-8 p-0"
-                  title="Vista de tarjetas"
-                >
-                  <LayoutGrid className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant={viewMode === 'list' ? 'default' : 'ghost'}
-                  size="sm"
-                  onClick={() => setViewMode('list')}
-                  className="h-8 w-8 p-0"
-                  title="Vista de lista"
-                >
-                  <List className="h-4 w-4" />
-                </Button>
+            {/* Title */}
+            <div>
+              <h1 className="text-xl font-bold text-gray-900 mb-2">
+                Resultados para: {topic}
+              </h1>
+              <p className="text-sm text-gray-600">
+                {results.length} resultados encontrados y categorizados
+                {isRefreshing && (
+                  <span className="ml-2 text-blue-600 font-medium">
+                    • Actualizando...
+                  </span>
+                )}
+              </p>
+            </div>
+            
+            {/* Mobile Controls - Stacked */}
+            <div className="space-y-3">
+              {/* View Mode Toggle - Hidden on mobile */}
+              <div className="hidden">
+                {/* Mobile always uses list view - no toggle needed */}
               </div>
               
-              <Button 
-                onClick={() => setShowConfigModal(true)}
-                variant="outline"
-                className="flex items-center gap-2"
-              >
-                <Settings className="h-4 w-4" />
-                Configurar Reglas
-              </Button>
-              
-              <Button 
-                onClick={handleRefreshInvestigation}
-                disabled={isRefreshing}
-                variant="outline"
-                className="flex items-center gap-2"
-              >
-                <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-                {isRefreshing ? 'Actualizando...' : 'Nueva Investigación'}
-              </Button>
+              {/* Action Buttons */}
+              <div className="flex flex-col space-y-2">
+                <Button 
+                  onClick={() => setShowConfigModal(true)}
+                  variant="outline"
+                  className="flex items-center justify-center gap-2 h-12"
+                >
+                  <Settings className="h-4 w-4" />
+                  Configurar Reglas
+                </Button>
+                
+                <Button 
+                  onClick={handleRefreshInvestigation}
+                  disabled={isRefreshing}
+                  variant="outline"
+                  className="flex items-center justify-center gap-2 h-12"
+                >
+                  <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+                  {isRefreshing ? 'Actualizando...' : 'Nueva Investigación'}
+                </Button>
+              </div>
             </div>
           </div>
-          
-          <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
-            Resultados para: {topic}
-          </h1>
-          <p className="text-gray-600">
-            {results.length} resultados encontrados y categorizados
-            {isRefreshing && (
-              <span className="ml-2 text-blue-600 font-medium">
-                • Actualizando resultados...
-              </span>
-            )}
-          </p>
+
+          {/* Desktop Header Layout */}
+          <div className="hidden md:block">
+            <div className="flex justify-between items-center mb-4">
+              <Link href="/investigation?show=topics">
+                <Button variant="outline">
+                  ← Volver a investigación
+                </Button>
+              </Link>
+              
+              <div className="flex items-center gap-2">
+                {/* Controles de vista */}
+                <div className="flex items-center space-x-2 bg-white rounded-lg p-1 shadow-sm border">
+                  <Button
+                    variant={viewMode === 'cards' ? 'default' : 'ghost'}
+                    size="sm"
+                    onClick={() => setViewMode('cards')}
+                    className="h-8 w-8 p-0"
+                    title="Vista de tarjetas"
+                  >
+                    <LayoutGrid className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant={viewMode === 'list' ? 'default' : 'ghost'}
+                    size="sm"
+                    onClick={() => setViewMode('list')}
+                    className="h-8 w-8 p-0"
+                    title="Vista de lista"
+                  >
+                    <List className="h-4 w-4" />
+                  </Button>
+                </div>
+                
+                <Button 
+                  onClick={() => setShowConfigModal(true)}
+                  variant="outline"
+                  className="flex items-center gap-2"
+                >
+                  <Settings className="h-4 w-4" />
+                  Configurar Reglas
+                </Button>
+                
+                <Button 
+                  onClick={handleRefreshInvestigation}
+                  disabled={isRefreshing}
+                  variant="outline"
+                  className="flex items-center gap-2"
+                >
+                  <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+                  {isRefreshing ? 'Actualizando...' : 'Nueva Investigación'}
+                </Button>
+              </div>
+            </div>
+            
+            <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
+              Resultados para: {topic}
+            </h1>
+            <p className="text-gray-600">
+              {results.length} resultados encontrados y categorizados
+              {isRefreshing && (
+                <span className="ml-2 text-blue-600 font-medium">
+                  • Actualizando resultados...
+                </span>
+              )}
+            </p>
+          </div>
         </div>
 
         {/* Sección de Exportación */}
         {results.length > 0 && (
-          <div className="bg-white rounded-lg shadow-sm border p-4 mb-8">
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-1">Exportar Resultados</h3>
-                <p className="text-sm text-gray-600">
-                  Descarga los resultados de la investigación en diferentes formatos
+          <div className="bg-white rounded-lg shadow-sm border p-4 mb-6 md:mb-8">
+            {/* Mobile Export Layout */}
+            <div className="block md:hidden">
+              <div className="text-center mb-4">
+                <h3 className="text-base font-semibold text-gray-900 mb-1">Exportar Resultados</h3>
+                <p className="text-xs text-gray-600">
+                  Descarga los resultados en diferentes formatos
                 </p>
               </div>
               
-              <div className="flex items-center gap-3">
-                <div className="relative">
-                  <Button
-                    onClick={() => setShowExportMenu(!showExportMenu)}
-                    variant="outline"
-                    className="flex items-center gap-2"
-                  >
-                    <Download className="h-4 w-4" />
-                    Exportar
-                  </Button>
-                  
-                  {showExportMenu && (
-                    <div className="export-menu-container absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border z-10">
-                      <div className="p-2">
-                        <button
-                          onClick={handleExportExcel}
-                          className="flex items-center gap-3 w-full p-3 text-left hover:bg-gray-50 rounded-lg transition-colors"
-                        >
-                          <FileSpreadsheet className="h-4 w-4 text-green-600" />
-                          <div>
-                            <div className="font-medium text-gray-900">Excel Completo</div>
-                            <div className="text-xs text-gray-500">Con resumen y hojas separadas</div>
-                          </div>
-                        </button>
-                        
-                        <button
-                          onClick={handleExportSimple}
-                          className="flex items-center gap-3 w-full p-3 text-left hover:bg-gray-50 rounded-lg transition-colors"
-                        >
-                          <FileText className="h-4 w-4 text-blue-600" />
-                          <div>
-                            <div className="font-medium text-gray-900">Lista Simple</div>
-                            <div className="text-xs text-gray-500">Solo título, URL y puntuación</div>
-                          </div>
-                        </button>
-                        
-                        <button
-                          onClick={handleExportCSV}
-                          className="flex items-center gap-3 w-full p-3 text-left hover:bg-gray-50 rounded-lg transition-colors"
-                        >
-                          <FileBarChart className="h-4 w-4 text-orange-600" />
-                          <div>
-                            <div className="font-medium text-gray-900">CSV</div>
-                            <div className="text-xs text-gray-500">Para análisis en otras herramientas</div>
-                          </div>
-                        </button>
-                      </div>
+              <div className="relative">
+                <Button
+                  onClick={() => setShowExportMenu(!showExportMenu)}
+                  variant="outline"
+                  className="w-full flex items-center justify-center gap-2 h-12"
+                >
+                  <Download className="h-4 w-4" />
+                  {showExportMenu ? 'Cerrar opciones' : 'Ver opciones de exportación'}
+                </Button>
+                
+                {showExportMenu && (
+                  <div className="export-menu-container mt-3 w-full bg-gray-50 rounded-lg border">
+                    <div className="p-3 space-y-2">
+                      <button
+                        onClick={handleExportExcel}
+                        className="flex items-center gap-3 w-full p-3 text-left hover:bg-white rounded-lg transition-colors border border-gray-200"
+                      >
+                        <FileSpreadsheet className="h-5 w-5 text-green-600" />
+                        <div>
+                          <div className="font-medium text-gray-900 text-sm">Excel Completo</div>
+                          <div className="text-xs text-gray-500">Con resumen y hojas separadas</div>
+                        </div>
+                      </button>
+                      
+                      <button
+                        onClick={handleExportSimple}
+                        className="flex items-center gap-3 w-full p-3 text-left hover:bg-white rounded-lg transition-colors border border-gray-200"
+                      >
+                        <FileText className="h-5 w-5 text-blue-600" />
+                        <div>
+                          <div className="font-medium text-gray-900 text-sm">Lista Simple</div>
+                          <div className="text-xs text-gray-500">Solo título, URL y puntuación</div>
+                        </div>
+                      </button>
+                      
+                      <button
+                        onClick={handleExportCSV}
+                        className="flex items-center gap-3 w-full p-3 text-left hover:bg-white rounded-lg transition-colors border border-gray-200"
+                      >
+                        <FileBarChart className="h-5 w-5 text-orange-600" />
+                        <div>
+                          <div className="font-medium text-gray-900 text-sm">CSV</div>
+                          <div className="text-xs text-gray-500">Para análisis en otras herramientas</div>
+                        </div>
+                      </button>
                     </div>
-                  )}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Desktop Export Layout */}
+            <div className="hidden md:block">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-1">Exportar Resultados</h3>
+                  <p className="text-sm text-gray-600">
+                    Descarga los resultados de la investigación en diferentes formatos
+                  </p>
+                </div>
+                
+                <div className="flex items-center gap-3">
+                  <div className="relative">
+                    <Button
+                      onClick={() => setShowExportMenu(!showExportMenu)}
+                      variant="outline"
+                      className="flex items-center gap-2"
+                    >
+                      <Download className="h-4 w-4" />
+                      Exportar
+                    </Button>
+                    
+                    {showExportMenu && (
+                      <div className="export-menu-container absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border z-10">
+                        <div className="p-2">
+                          <button
+                            onClick={handleExportExcel}
+                            className="flex items-center gap-3 w-full p-3 text-left hover:bg-gray-50 rounded-lg transition-colors"
+                          >
+                            <FileSpreadsheet className="h-4 w-4 text-green-600" />
+                            <div>
+                              <div className="font-medium text-gray-900">Excel Completo</div>
+                              <div className="text-xs text-gray-500">Con resumen y hojas separadas</div>
+                            </div>
+                          </button>
+                          
+                          <button
+                            onClick={handleExportSimple}
+                            className="flex items-center gap-3 w-full p-3 text-left hover:bg-gray-50 rounded-lg transition-colors"
+                          >
+                            <FileText className="h-4 w-4 text-blue-600" />
+                            <div>
+                              <div className="font-medium text-gray-900">Lista Simple</div>
+                              <div className="text-xs text-gray-500">Solo título, URL y puntuación</div>
+                            </div>
+                          </button>
+                          
+                          <button
+                            onClick={handleExportCSV}
+                            className="flex items-center gap-3 w-full p-3 text-left hover:bg-gray-50 rounded-lg transition-colors"
+                          >
+                            <FileBarChart className="h-4 w-4 text-orange-600" />
+                            <div>
+                              <div className="font-medium text-gray-900">CSV</div>
+                              <div className="text-xs text-gray-500">Para análisis en otras herramientas</div>
+                            </div>
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         )}
 
-        <div className={viewMode === 'cards' ? 'grid md:grid-cols-2 gap-8' : 'space-y-6'}>
+        <div className={effectiveViewMode === 'cards' ? 'grid md:grid-cols-2 gap-4 md:gap-8' : 'space-y-4 md:space-y-6'}>
           {/* Contenido que vale la pena expandir */}
           <div className="space-y-4">
             <div 
-              className="bg-green-50 border-l-4 border-green-400 p-4 rounded-lg cursor-pointer hover:bg-green-100 transition-colors"
+              className="bg-green-50 border-l-4 border-green-400 p-3 md:p-4 rounded-lg cursor-pointer hover:bg-green-100 transition-colors"
               onClick={() => setExpandWorthyExpanded(!expandWorthyExpanded)}
             >
-              <h2 className="text-xl font-semibold text-green-800 mb-2 flex items-center justify-between">
+              <h2 className="text-lg md:text-xl font-semibold text-green-800 mb-2 flex items-center justify-between">
                 <div className="flex items-center">
-                  ✅ Vale la pena expandir
-                  <span className="ml-2 bg-green-200 text-green-800 px-2 py-1 rounded-full text-sm">
+                  <span className="text-lg md:text-xl">✅</span>
+                  <span className="ml-2">Vale la pena expandir</span>
+                  <span className="ml-2 bg-green-200 text-green-800 px-2 py-1 rounded-full text-xs md:text-sm font-medium">
                     {categorizedResults.expandWorthy.length}
                   </span>
                 </div>
@@ -575,21 +705,21 @@ export default function ResearchPageContent() {
                   )}
                 </div>
               </h2>
-              <p className="text-green-700 text-sm">
+              <p className="text-green-700 text-xs md:text-sm">
                 Contenido con alta relevancia y potencial para artículos
               </p>
             </div>
 
             {expandWorthyExpanded && (
               <div className="animate-slideDown">
-                {viewMode === 'cards' ? (
-                  <div className="space-y-4">
+                {effectiveViewMode === 'cards' ? (
+                  <div className="space-y-3 md:space-y-4">
                     {categorizedResults.expandWorthy.map((result, index) => 
                       renderResultCard(result, index, true)
                     )}
                   </div>
                 ) : (
-                  <div className="space-y-3">
+                  <div className="space-y-2 md:space-y-3">
                     {categorizedResults.expandWorthy.map((result, index) => 
                       renderResultListItem(result, index, true)
                     )}
@@ -602,13 +732,14 @@ export default function ResearchPageContent() {
           {/* Contenido que NO vale la pena expandir */}
           <div className="space-y-4">
             <div 
-              className="bg-gray-50 border-l-4 border-gray-400 p-4 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors"
+              className="bg-gray-50 border-l-4 border-gray-400 p-3 md:p-4 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors"
               onClick={() => setNotExpandWorthyExpanded(!notExpandWorthyExpanded)}
             >
-              <h2 className="text-xl font-semibold text-gray-800 mb-2 flex items-center justify-between">
+              <h2 className="text-lg md:text-xl font-semibold text-gray-800 mb-2 flex items-center justify-between">
                 <div className="flex items-center">
-                  ❌ No vale la pena expandir
-                  <span className="ml-2 bg-gray-200 text-gray-800 px-2 py-1 rounded-full text-sm">
+                  <span className="text-lg md:text-xl">❌</span>
+                  <span className="ml-2">No vale la pena expandir</span>
+                  <span className="ml-2 bg-gray-200 text-gray-800 px-2 py-1 rounded-full text-xs md:text-sm font-medium">
                     {categorizedResults.notExpandWorthy.length}
                   </span>
                 </div>
@@ -620,21 +751,21 @@ export default function ResearchPageContent() {
                   )}
                 </div>
               </h2>
-              <p className="text-gray-700 text-sm">
+              <p className="text-gray-700 text-xs md:text-sm">
                 Contenido con menor relevancia o información limitada
               </p>
             </div>
 
             {notExpandWorthyExpanded && (
               <div className="animate-slideDown">
-                {viewMode === 'cards' ? (
-                  <div className="space-y-4">
+                {effectiveViewMode === 'cards' ? (
+                  <div className="space-y-3 md:space-y-4">
                     {categorizedResults.notExpandWorthy.map((result, index) => 
                       renderResultCard(result, index, false)
                     )}
                   </div>
                 ) : (
-                  <div className="space-y-3">
+                  <div className="space-y-2 md:space-y-3">
                     {categorizedResults.notExpandWorthy.map((result, index) => 
                       renderResultListItem(result, index, false)
                     )}
@@ -646,12 +777,12 @@ export default function ResearchPageContent() {
         </div>
 
         {results.length === 0 && !isLoading && (
-          <div className="text-center py-12">
-            <div className="text-6xl mb-4">🔍</div>
-            <h3 className="text-xl font-semibold text-gray-800 mb-2">
+          <div className="text-center py-8 md:py-12 px-4">
+            <div className="text-4xl md:text-6xl mb-4">🔍</div>
+            <h3 className="text-lg md:text-xl font-semibold text-gray-800 mb-2">
               No se encontraron resultados
             </h3>
-            <p className="text-gray-600">
+            <p className="text-sm md:text-base text-gray-600 max-w-md mx-auto">
               Intenta con un tema diferente o verifica la configuración de la API
             </p>
           </div>
