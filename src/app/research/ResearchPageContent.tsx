@@ -9,8 +9,10 @@ import { useResearchCache } from '@/hooks/useResearchCache';
 import { useCategorizationRules } from '@/hooks/useCategorizationRules';
 import { useExcelExport } from '@/hooks/useExcelExport';
 import { CategorizationRulesConfig } from '@/components/CategorizationRulesConfig';
-import { RefreshCw, Settings, Download, FileSpreadsheet, FileText, FileBarChart } from 'lucide-react';
+import { RefreshCw, Settings, Download, FileSpreadsheet, FileText, FileBarChart, LayoutGrid, List, ExternalLink, ChevronRight, ChevronDown, ChevronUp } from 'lucide-react';
 import Link from 'next/link';
+
+type ViewMode = 'cards' | 'list';
 
 export default function ResearchPageContent() {
   const searchParams = useSearchParams();
@@ -35,6 +37,9 @@ export default function ResearchPageContent() {
   const [error, setError] = useState<string | null>(null);
   const [showConfigModal, setShowConfigModal] = useState(false);
   const [showExportMenu, setShowExportMenu] = useState(false);
+  const [viewMode, setViewMode] = useState<ViewMode>('cards');
+  const [expandWorthyExpanded, setExpandWorthyExpanded] = useState(true);
+  const [notExpandWorthyExpanded, setNotExpandWorthyExpanded] = useState(true);
 
   const fetchResearch = useCallback(async (forceRefresh: boolean = false, customRules?: CustomCategorizationRules) => {
     if (!topic) return;
@@ -229,6 +234,99 @@ export default function ResearchPageContent() {
     router.push(`/article?${params.toString()}`);
   };
 
+  const renderResultCard = (result: CategorizedResult, index: number, isExpandWorthy: boolean) => (
+    <div key={index} className={`bg-white rounded-lg p-6 shadow-lg border-l-4 ${isExpandWorthy ? 'border-green-400' : 'border-gray-400'} ${!isExpandWorthy ? 'opacity-75' : ''}`}>
+      <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2">
+        {result.title}
+      </h3>
+      <p className="text-sm text-gray-600 mb-2">
+        {result.reasoning}
+      </p>
+      {result.score && (
+        <div className="text-xs text-gray-500 mb-3">
+          Puntuación: {Math.round(result.score * 100)}%
+        </div>
+      )}
+      <div className="flex justify-between items-center">
+        <a
+          href={result.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-blue-600 hover:underline text-sm truncate flex-1 mr-4"
+        >
+          {result.url}
+        </a>
+        {isExpandWorthy && (
+          <Button
+            onClick={() => handleStartArticle(result)}
+            size="sm"
+            className="bg-green-600 hover:bg-green-700"
+          >
+            Crear Artículo
+          </Button>
+        )}
+      </div>
+    </div>
+  );
+
+  const renderResultListItem = (result: CategorizedResult, index: number, isExpandWorthy: boolean) => (
+    <div key={index} className={`bg-white rounded-lg border p-4 hover:shadow-md transition-shadow ${isExpandWorthy ? 'border-l-4 border-l-green-400' : 'border-l-4 border-l-gray-400'} ${!isExpandWorthy ? 'opacity-75' : ''}`}>
+      <div className="flex items-start justify-between">
+        <div className="flex-1 min-w-0">
+          <div className="flex items-start gap-3">
+            <div className={`flex-shrink-0 w-2 h-2 rounded-full mt-2 ${isExpandWorthy ? 'bg-green-500' : 'bg-gray-400'}`}></div>
+            <div className="flex-1 min-w-0">
+              <h3 className="font-semibold text-gray-900 mb-1 line-clamp-2">
+                {result.title}
+              </h3>
+              <p className="text-sm text-gray-600 mb-2 line-clamp-2">
+                {result.reasoning}
+              </p>
+              <div className="flex items-center gap-4 text-xs text-gray-500">
+                {result.score && (
+                  <span className="flex items-center gap-1">
+                    📊 {Math.round(result.score * 100)}%
+                  </span>
+                )}
+                {result.author && (
+                  <span className="flex items-center gap-1">
+                    👤 {result.author}
+                  </span>
+                )}
+                {result.publishedDate && (
+                  <span className="flex items-center gap-1">
+                    📅 {new Date(result.publishedDate).toLocaleDateString('es-ES')}
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="flex items-center gap-2 ml-4 flex-shrink-0">
+          <a
+            href={result.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-600 hover:text-blue-800 p-1"
+            title="Abrir enlace"
+          >
+            <ExternalLink className="h-4 w-4" />
+          </a>
+          {isExpandWorthy && (
+            <Button
+              onClick={() => handleStartArticle(result)}
+              size="sm"
+              className="bg-green-600 hover:bg-green-700 text-xs px-3 py-1 h-7"
+            >
+              <ChevronRight className="h-3 w-3 mr-1" />
+              Artículo
+            </Button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+
   if (!topic) {
     return null;
   }
@@ -333,6 +431,28 @@ export default function ResearchPageContent() {
             </Link>
             
             <div className="flex items-center gap-2">
+              {/* Controles de vista */}
+              <div className="flex items-center space-x-2 bg-white rounded-lg p-1 shadow-sm border">
+                <Button
+                  variant={viewMode === 'cards' ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => setViewMode('cards')}
+                  className="h-8 w-8 p-0"
+                  title="Vista de tarjetas"
+                >
+                  <LayoutGrid className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant={viewMode === 'list' ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => setViewMode('list')}
+                  className="h-8 w-8 p-0"
+                  title="Vista de lista"
+                >
+                  <List className="h-4 w-4" />
+                </Button>
+              </div>
+              
               <Button 
                 onClick={() => setShowConfigModal(true)}
                 variant="outline"
@@ -433,96 +553,95 @@ export default function ResearchPageContent() {
           </div>
         )}
 
-        <div className="grid md:grid-cols-2 gap-8">
+        <div className={viewMode === 'cards' ? 'grid md:grid-cols-2 gap-8' : 'space-y-6'}>
           {/* Contenido que vale la pena expandir */}
           <div className="space-y-4">
-            <div className="bg-green-50 border-l-4 border-green-400 p-4 rounded-lg">
-              <h2 className="text-xl font-semibold text-green-800 mb-2 flex items-center">
-                ✅ Vale la pena expandir
-                <span className="ml-2 bg-green-200 text-green-800 px-2 py-1 rounded-full text-sm">
-                  {categorizedResults.expandWorthy.length}
-                </span>
+            <div 
+              className="bg-green-50 border-l-4 border-green-400 p-4 rounded-lg cursor-pointer hover:bg-green-100 transition-colors"
+              onClick={() => setExpandWorthyExpanded(!expandWorthyExpanded)}
+            >
+              <h2 className="text-xl font-semibold text-green-800 mb-2 flex items-center justify-between">
+                <div className="flex items-center">
+                  ✅ Vale la pena expandir
+                  <span className="ml-2 bg-green-200 text-green-800 px-2 py-1 rounded-full text-sm">
+                    {categorizedResults.expandWorthy.length}
+                  </span>
+                </div>
+                <div className="text-green-600">
+                  {expandWorthyExpanded ? (
+                    <ChevronUp className="h-5 w-5" />
+                  ) : (
+                    <ChevronDown className="h-5 w-5" />
+                  )}
+                </div>
               </h2>
               <p className="text-green-700 text-sm">
                 Contenido con alta relevancia y potencial para artículos
               </p>
             </div>
 
-            <div className="space-y-4">
-              {categorizedResults.expandWorthy.map((result, index) => (
-                <div key={index} className="bg-white rounded-lg p-6 shadow-lg border-l-4 border-green-400">
-                  <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2">
-                    {result.title}
-                  </h3>
-                  <p className="text-sm text-gray-600 mb-2">
-                    {result.reasoning}
-                  </p>
-                  {result.score && (
-                    <div className="text-xs text-gray-500 mb-3">
-                      Puntuación: {Math.round(result.score * 100)}%
-                    </div>
-                  )}
-                  <div className="flex justify-between items-center">
-                    <a
-                      href={result.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-blue-600 hover:underline text-sm truncate flex-1 mr-4"
-                    >
-                      {result.url}
-                    </a>
-                    <Button
-                      onClick={() => handleStartArticle(result)}
-                      size="sm"
-                      className="bg-green-600 hover:bg-green-700"
-                    >
-                      Crear Artículo
-                    </Button>
+            {expandWorthyExpanded && (
+              <div className="animate-slideDown">
+                {viewMode === 'cards' ? (
+                  <div className="space-y-4">
+                    {categorizedResults.expandWorthy.map((result, index) => 
+                      renderResultCard(result, index, true)
+                    )}
                   </div>
-                </div>
-              ))}
-            </div>
+                ) : (
+                  <div className="space-y-3">
+                    {categorizedResults.expandWorthy.map((result, index) => 
+                      renderResultListItem(result, index, true)
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Contenido que NO vale la pena expandir */}
           <div className="space-y-4">
-            <div className="bg-gray-50 border-l-4 border-gray-400 p-4 rounded-lg">
-              <h2 className="text-xl font-semibold text-gray-800 mb-2 flex items-center">
-                ❌ No vale la pena expandir
-                <span className="ml-2 bg-gray-200 text-gray-800 px-2 py-1 rounded-full text-sm">
-                  {categorizedResults.notExpandWorthy.length}
-                </span>
+            <div 
+              className="bg-gray-50 border-l-4 border-gray-400 p-4 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors"
+              onClick={() => setNotExpandWorthyExpanded(!notExpandWorthyExpanded)}
+            >
+              <h2 className="text-xl font-semibold text-gray-800 mb-2 flex items-center justify-between">
+                <div className="flex items-center">
+                  ❌ No vale la pena expandir
+                  <span className="ml-2 bg-gray-200 text-gray-800 px-2 py-1 rounded-full text-sm">
+                    {categorizedResults.notExpandWorthy.length}
+                  </span>
+                </div>
+                <div className="text-gray-600">
+                  {notExpandWorthyExpanded ? (
+                    <ChevronUp className="h-5 w-5" />
+                  ) : (
+                    <ChevronDown className="h-5 w-5" />
+                  )}
+                </div>
               </h2>
               <p className="text-gray-700 text-sm">
                 Contenido con menor relevancia o información limitada
               </p>
             </div>
 
-            <div className="space-y-4">
-              {categorizedResults.notExpandWorthy.map((result, index) => (
-                <div key={index} className="bg-white rounded-lg p-6 shadow-lg border-l-4 border-gray-400 opacity-75">
-                  <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2">
-                    {result.title}
-                  </h3>
-                  <p className="text-sm text-gray-600 mb-2">
-                    {result.reasoning}
-                  </p>
-                  {result.score && (
-                    <div className="text-xs text-gray-500 mb-3">
-                      Puntuación: {Math.round(result.score * 100)}%
-                    </div>
-                  )}
-                  <a
-                    href={result.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-blue-600 hover:underline text-sm truncate block"
-                  >
-                    {result.url}
-                  </a>
-                </div>
-              ))}
-            </div>
+            {notExpandWorthyExpanded && (
+              <div className="animate-slideDown">
+                {viewMode === 'cards' ? (
+                  <div className="space-y-4">
+                    {categorizedResults.notExpandWorthy.map((result, index) => 
+                      renderResultCard(result, index, false)
+                    )}
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {categorizedResults.notExpandWorthy.map((result, index) => 
+                      renderResultListItem(result, index, false)
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
 
