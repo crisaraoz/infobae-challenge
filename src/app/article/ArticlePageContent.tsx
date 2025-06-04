@@ -246,6 +246,124 @@ export default function ArticlePageContent() {
     // Aquí se podría implementar lógica para guardar en localStorage o backend
   };
 
+  const handleDownloadText = () => {
+    const articleContent = `${currentArticleTitle || `Investigación sobre ${topic}`}\n\n${generatedArticle}`;
+    const blob = new Blob([articleContent], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${topic?.replace(/\s+/g, '-').toLowerCase() || 'articulo'}-${new Date().toISOString().split('T')[0]}.txt`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  const handleDownloadPDF = async () => {
+    try {
+      // Crear el contenido HTML para el PDF
+      const htmlContent = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="UTF-8">
+          <title>${currentArticleTitle || `Investigación sobre ${topic}`}</title>
+          <style>
+            body { 
+              font-family: 'Segoe UI', system-ui, sans-serif; 
+              line-height: 1.6; 
+              color: #333; 
+              max-width: 800px; 
+              margin: 0 auto; 
+              padding: 40px 20px; 
+            }
+            h1 { 
+              color: #1e40af; 
+              border-bottom: 3px solid #3b82f6; 
+              padding-bottom: 10px; 
+              margin-bottom: 30px; 
+            }
+            h2 { 
+              color: #1f2937; 
+              border-left: 4px solid #3b82f6; 
+              padding-left: 16px; 
+              margin-top: 40px; 
+              margin-bottom: 20px; 
+            }
+            h3 { 
+              color: #374151; 
+              border-left: 2px solid #8b5cf6; 
+              padding-left: 12px; 
+              margin-top: 30px; 
+            }
+            p { margin-bottom: 16px; }
+            strong { background-color: #fef3c7; padding: 2px 4px; border-radius: 3px; }
+            ul, ol { margin: 16px 0; padding-left: 24px; }
+            li { margin-bottom: 8px; }
+            hr { 
+              border: none; 
+              height: 2px; 
+              background: #e5e7eb; 
+              margin: 40px 0; 
+            }
+            .footer { 
+              margin-top: 40px; 
+              padding-top: 20px; 
+              border-top: 1px solid #e5e7eb; 
+              font-size: 12px; 
+              color: #6b7280; 
+              text-align: center; 
+            }
+          </style>
+        </head>
+        <body>
+          ${generatedArticle.split('\n').map(line => {
+            if (line.trim() === '') return '<br>';
+            if (line.startsWith('# ')) return `<h1>${line.replace('# ', '')}</h1>`;
+            if (line.startsWith('## ')) return `<h2>${line.replace('## ', '')}</h2>`;
+            if (line.startsWith('### ')) return `<h3>${line.replace('### ', '')}</h3>`;
+            if (line.match(/^\d+\.\s/)) return `<li>${line.replace(/^\d+\.\s/, '')}</li>`;
+            if (line.startsWith('- ')) return `<li>${line.replace('- ', '')}</li>`;
+            if (line.startsWith('---')) return '<hr>';
+            if (line.startsWith('*') && line.endsWith('*')) {
+              return `<p style="font-style: italic; background: #f3f4f6; padding: 16px; border-left: 4px solid #9ca3af; margin: 20px 0;">${line.replace(/^\*/, '').replace(/\*$/, '')}</p>`;
+            }
+            if (line.trim()) {
+              const processedLine = line.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+              return `<p>${processedLine}</p>`;
+            }
+            return '';
+          }).join('')}
+          <div class="footer">
+            <p>Artículo generado por Infobae AI el ${new Date().toLocaleDateString('es-ES')}</p>
+            <p>Investigación sobre: ${topic}</p>
+          </div>
+        </body>
+        </html>
+      `;
+
+      // Crear y descargar el archivo HTML que se puede convertir a PDF
+      const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${topic?.replace(/\s+/g, '-').toLowerCase() || 'articulo'}-${new Date().toISOString().split('T')[0]}.html`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      // Mostrar instrucciones al usuario
+      setTimeout(() => {
+        alert('Se ha descargado el archivo HTML. Para convertirlo a PDF:\n\n1. Abre el archivo en tu navegador\n2. Presiona Ctrl+P (Cmd+P en Mac)\n3. Selecciona "Guardar como PDF" como destino\n4. Ajusta los márgenes si es necesario\n5. Guarda el archivo');
+      }, 500);
+
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      alert('Error al generar el PDF. Por favor, intenta nuevamente.');
+    }
+  };
+
   if (!topic || !initialTitle) {
     return (
       <main className="flex flex-col items-center justify-center min-h-screen p-4">
@@ -348,7 +466,7 @@ export default function ArticlePageContent() {
                 <Share2 className="h-4 w-4" />
               </Button>
 
-              <Button variant="ghost" size="sm">
+              <Button variant="ghost" size="sm" onClick={handleDownloadText} title="Descargar como texto">
                 <Download className="h-4 w-4" />
               </Button>
             </div>
@@ -359,18 +477,21 @@ export default function ArticlePageContent() {
       <div className="max-w-7xl mx-auto flex">
         {/* Sidebar - Table of Contents */}
         {!loading && tableOfContents.length > 0 && (
-          <aside className={`hidden lg:block sticky top-20 h-fit transition-all duration-300 ${isSidebarOpen ? 'w-80' : 'w-12'}`}>
+          <aside className={`hidden lg:block sticky top-20 h-fit transition-all duration-300 ${isSidebarOpen ? 'w-80' : 'w-16'}`}>
             <div className="p-4">
               <div className="bg-white rounded-lg shadow-sm border p-4">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className={`font-semibold text-gray-900 ${!isSidebarOpen && 'hidden'}`}>
-                    Índice del artículo
-                  </h3>
+                <div className={`flex items-center ${isSidebarOpen ? 'justify-between mb-4' : 'justify-center'}`}>
+                  {isSidebarOpen && (
+                    <h3 className="font-semibold text-gray-900">
+                      Índice del artículo
+                    </h3>
+                  )}
                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-                    className="p-1"
+                    className={`${isSidebarOpen ? 'p-1' : 'p-2'} hover:bg-gray-100`}
+                    title={isSidebarOpen ? "Contraer índice" : "Expandir índice"}
                   >
                     <BookOpen className="h-4 w-4" />
                   </Button>
@@ -729,7 +850,7 @@ export default function ArticlePageContent() {
                       Compartir
                     </Button>
                     
-                    <Button variant="outline" size="sm">
+                    <Button variant="outline" size="sm" onClick={handleDownloadPDF} title="Descargar como PDF">
                       <Download className="h-4 w-4 mr-1" />
                       Descargar PDF
                     </Button>
