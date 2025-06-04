@@ -2,42 +2,11 @@
 
 Un sistema avanzado de investigación que utiliza inteligencia artificial para buscar, analizar y categorizar contenido relevante sobre cualquier tema, generando artículos de alta calidad basados en fuentes confiables.
 
-## 🎬 Demostración
-
-### 📸 Capturas de Pantalla
-
-**🔍 Proceso de Investigación Completo**
-
-<div align="center">
-  <img src="./public/screen_1.png" alt="Pantalla inicial de investigación" width="45%" />
-  <img src="./public/screen_2.png" alt="Proceso de búsqueda" width="45%" />
-</div>
-
-<div align="center">
-  <img src="./public/screen_3.png" alt="Resultados categorizados" width="45%" />
-  <img src="./public/screen_4.png" alt="Generación de artículos" width="45%" />
-</div>
-
-### 🖼️ **Galería de funcionalidades:**
-
-1. **🏠 Pantalla inicial** (`screen_1.png`) - Interfaz principal y búsqueda
-2. **🔍 Proceso de búsqueda** (`screen_2.png`) - IA procesando consultas
-3. **📊 Resultados categorizados** (`screen_3.png`) - Análisis y categorización
-4. **📝 Generación de artículos** (`screen_4.png`) - Creación de contenido
-
-### ✨ Lo que ves en las capturas:
-- 🔍 **Búsqueda inteligente** con optimización de consultas
-- ⚡ **Velocidad de compilación** mejorada (3.5s vs 14.6s)
-- 📊 **Categorización automática** de resultados
-- 🎨 **Interfaz moderna** y responsive
-- 🧠 **Procesamiento con IA** en tiempo real
-- 📱 **Experiencia de usuario** fluida
-
 ## 🚀 Inicio Rápido
 
 ### 📋 Prerrequisitos
 
-- **Node.js 18+** - [Descargar aquí](https://nodejs.org/)
+- **Node.js 18+**
 - **npm** o **yarn**
 - **Claves de API** (ver configuración más abajo)
 
@@ -45,7 +14,7 @@ Un sistema avanzado de investigación que utiliza inteligencia artificial para b
 
 1. **Clonar el repositorio**
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/crisaraoz/infobae-challenge.git
    cd infobae-ai-challenge
    ```
 
@@ -96,6 +65,7 @@ Un sistema avanzado de investigación que utiliza inteligencia artificial para b
    
    Abre [http://localhost:3000](http://localhost:3000) en tu navegador.
 
+
 ## 🏗️ Arquitectura del Sistema
 
 ### 📁 Estructura del Proyecto
@@ -139,25 +109,19 @@ src/
 - **📱 Responsive Design**: Interfaz adaptada a todos los dispositivos
 - **🎨 UI Moderna**: Componentes con Tailwind CSS y Radix UI
 
-### 🛠️ Scripts Disponibles
+## 📸 Demo
 
-```bash
-# Desarrollo
-npm run dev          # Servidor de desarrollo con Turbopack
-npm run dev:fast     # Desarrollo sin type checking (más rápido)
+**🔍 Proceso de Investigación Completo**
 
-# Construcción
-npm run build        # Build de producción
-npm run build:analyze # Análisis del bundle
+<div align="center">
+  <img src="./public/screen_1.png" alt="Pantalla inicial de investigación" width="45%" />
+  <img src="./public/screen_2.png" alt="Proceso de búsqueda" width="45%" />
+</div>
 
-# Calidad de código
-npm run lint         # Ejecutar ESLint
-npm run lint:fix     # Corregir errores automáticamente
-npm run type-check   # Verificar tipos TypeScript
-
-# Utilidades
-npm run optimize     # Aplicar optimizaciones de rendimiento
-```
+<div align="center">
+  <img src="./public/screen_3.png" alt="Resultados categorizados" width="45%" />
+  <img src="./public/screen_4.png" alt="Generación de artículos" width="45%" />
+</div>
 
 ## 🚀 Optimizaciones de Rendimiento
 
@@ -169,7 +133,7 @@ npm run optimize     # Aplicar optimizaciones de rendimiento
 - **Type checking opcional**: Modo rápido sin verificación de tipos
 - **Bundle optimization**: Análisis y optimización de bundles
 
-## 🔮 Posibilidad de Nuevas Futuras
+## 🔮 Posibilidad de Mejoras Futuras
 
 ### 🎯 Versión 2.0
 
@@ -236,6 +200,26 @@ npm run optimize     # Aplicar optimizaciones de rendimiento
 - **Prettier** - Formateo de código
 - **TypeScript** - Type checking
 - **Turbopack** - Bundling ultra-rápido
+
+### 🛠️ Scripts Disponibles
+
+```bash
+# Desarrollo
+npm run dev          # Servidor de desarrollo con Turbopack
+npm run dev:fast     # Desarrollo sin type checking (más rápido)
+
+# Construcción
+npm run build        # Build de producción
+npm run build:analyze # Análisis del bundle
+
+# Calidad de código
+npm run lint         # Ejecutar ESLint
+npm run lint:fix     # Corregir errores automáticamente
+npm run type-check   # Verificar tipos TypeScript
+
+# Utilidades
+npm run optimize     # Aplicar optimizaciones de rendimiento
+```
 
 ## 📝 Scripts de Configuración
 
