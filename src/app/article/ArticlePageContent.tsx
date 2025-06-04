@@ -94,6 +94,7 @@ export default function ArticlePageContent() {
   const score = searchParams.get('score');
   const publishedDate = searchParams.get('publishedDate');
   const reasoning = searchParams.get('reasoning');
+  const origin = searchParams.get('origin');
   const [loading, setLoading] = useState(true);
   const [generatedArticle, setGeneratedArticle] = useState<string>('');
   const [currentArticleTitle, setCurrentArticleTitle] = useState<string | null>(initialTitle);
@@ -382,6 +383,22 @@ export default function ArticlePageContent() {
     }
   };
 
+  // Función para determinar la URL de regreso basada en el origen
+  const getBackUrl = () => {
+    if (origin === 'generate') {
+      return '/generate';
+    }
+    // Por defecto, volver a research o investigation
+    return `/research?topic=${encodeURIComponent(topic || '')}`;
+  };
+
+  const getBackText = () => {
+    if (origin === 'generate') {
+      return 'Volver a Generación';
+    }
+    return 'Volver a Investigación';
+  };
+
   if (!topic || !initialTitle) {
     return (
       <main className="flex flex-col items-center justify-center min-h-screen p-4">
@@ -389,8 +406,8 @@ export default function ArticlePageContent() {
           <FileText className="mx-auto h-16 w-16 text-gray-400 mb-4" />
           <h1 className="text-2xl font-semibold mb-4 text-gray-800">No se encontró el tema</h1>
           <p className="text-gray-600 mb-6">No se proporcionó información suficiente para generar el artículo.</p>
-          <Link href="/investigation">
-            <Button>Volver a Investigación</Button>
+          <Link href={getBackUrl()}>
+            <Button>{getBackText()}</Button>
           </Link>
         </div>
       </main>
@@ -412,12 +429,15 @@ export default function ArticlePageContent() {
         <div className="max-w-7xl mx-auto px-3 md:px-4 py-2 md:py-3">
           {/* Breadcrumbs */}
           <nav className="flex items-center space-x-1 md:space-x-2 text-xs md:text-sm text-gray-600 mb-2 md:mb-3">
-            <Link href="/investigation" className="flex items-center hover:text-blue-600 transition-colors">
+            <Link href={getBackUrl()} className="flex items-center hover:text-blue-600 transition-colors">
               <Home className="h-3 w-3 md:h-4 md:w-4 mr-1" />
-              <span className="hidden sm:inline">Inicio</span>
+              <span className="hidden sm:inline">{origin === 'generate' ? 'Generación' : 'Inicio'}</span>
             </Link>
             <ChevronRight className="h-3 w-3 md:h-4 md:w-4" />
-            <Link href={`/research?topic=${encodeURIComponent(topic || '')}`} className="flex items-center hover:text-blue-600 transition-colors">
+            <Link 
+              href={origin === 'generate' ? '/investigation' : `/research?topic=${encodeURIComponent(topic || '')}`} 
+              className="flex items-center hover:text-blue-600 transition-colors"
+            >
               <Search className="h-3 w-3 md:h-4 md:w-4 mr-1" />
               <span className="hidden sm:inline">Investigación</span>
             </Link>
@@ -987,10 +1007,10 @@ export default function ArticlePageContent() {
                       </a>
                     )}
                     
-                    <Link href="/investigation">
+                    <Link href={getBackUrl()}>
                       <Button variant="outline" className="w-full justify-start text-xs md:text-sm h-10 md:h-auto">
                         <Home className="h-3 w-3 md:h-4 md:w-4 mr-2" />
-                        Nueva investigación
+                        {getBackText()}
                       </Button>
                     </Link>
                   </div>
