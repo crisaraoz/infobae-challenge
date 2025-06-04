@@ -107,8 +107,9 @@ src/
 ### ✨ Características Principales
 
 - **🔍 Búsqueda Inteligente**: Utiliza Exa API para búsquedas semánticas avanzadas
-- **�� Análisis con IA**: OpenAI procesa y optimiza consultas
+- **🚀 Análisis con IA**: OpenAI procesa y optimiza consultas
 - **📊 Categorización Automática**: Algoritmos heurísticos evalúan relevancia
+- **🎯 Generación Automátática de Artículos y Títulos**: En base a un tópico, url ó imágen provista
 - **⚡ Cache Inteligente**: Sistema de caché para mejorar rendimiento
 - **📱 Responsive Design**: Interfaz adaptada a todos los dispositivos
 - **🎨 UI Moderna**: Componentes con Tailwind CSS y Radix UI
@@ -116,14 +117,13 @@ src/
 ## 📸 Demo y Capturas del Sistema
 
 ### 🎬 Video Demo
-Video completo que muestra todas las funcionalidades:
 
 <div align="center">
   
   <!-- Opción 1: GIF Demo Directo (sin necesidad de descargar) -->
   <img src="./public/demoVideo.gif" alt="Demo completo del sistema - Funcionalidades principales" width="80%" />
   
-  <p><em>👆 Demo interactivo mostrando todas las funcionalidades del sistema</em></p>
+  <p><em>👆 Demo interactivo mostrando todas las funcionalidades</em></p>
   
   <!-- Opción 2: Descarga directa desde GitHub Release -->
   <p>
@@ -177,24 +177,6 @@ Video completo que muestra todas las funcionalidades:
   <p><em>Interfaz moderna del artículo con tabla de contenidos, progress tracker y funciones de descarga</em></p>
 </div>
 
-### 🎯 Características Destacadas Mostradas
-
-- **🚀 Búsqueda Inteligente**: Interfaz intuitiva con optimización de consultas
-- **📊 Categorización Automática**: Resultados organizados por relevancia usando heurísticas avanzadas
-- **📱 Diseño Responsive**: Experiencia optimizada en todos los dispositivos
-- **🤖 Generación de Contenido**: Artículos profesionales generados con IA
-- **🧭 Navegación Avanzada**: Tabla de contenidos interactiva y seguimiento de progreso
-- **💾 Funciones de Exportación**: Descarga en múltiples formatos (PDF, texto, Excel, CSV)
-
-## 🚀 Optimizaciones de Rendimiento
-
-### ⚡ Configuraciones Aplicadas
-
-- **Turbopack**: Compilación ultra-rápida de Next.js 15
-- **Optimización de imports**: Paquetes específicos optimizados
-- **Cache inteligente**: Sistema de caché del filesystem
-- **Type checking opcional**: Modo rápido sin verificación de tipos
-- **Bundle optimization**: Análisis y optimización de bundles
 
 ## 🔮 Posibilidad de Mejoras Futuras
 
