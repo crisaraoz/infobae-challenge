@@ -112,6 +112,7 @@ export default function ArticlePageContent() {
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [copySuccess, setCopySuccess] = useState(false);
   const articleRef = useRef<HTMLDivElement>(null);
+  const [showExportMenu, setShowExportMenu] = useState(false);
 
   // Calcular tiempo estimado de lectura
   const calculateReadingTime = useCallback((text: string) => {
@@ -184,6 +185,23 @@ export default function ArticlePageContent() {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, [loading]);
+
+  // Cerrar menú de exportación móvil al hacer clic fuera
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (showExportMenu) {
+        const target = event.target as Element;
+        if (!target.closest('.mobile-export-menu')) {
+          setShowExportMenu(false);
+        }
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showExportMenu]);
 
   const handleGenerateTitles = async () => {
     if (!content || numTitlesToGenerate <= 0) {
@@ -391,37 +409,37 @@ export default function ArticlePageContent() {
 
       {/* Modern Header */}
       <header className="bg-white border-b border-gray-200 sticky top-1 z-40">
-        <div className="max-w-7xl mx-auto px-4 py-3">
+        <div className="max-w-7xl mx-auto px-3 md:px-4 py-2 md:py-3">
           {/* Breadcrumbs */}
-          <nav className="flex items-center space-x-2 text-sm text-gray-600 mb-3">
+          <nav className="flex items-center space-x-1 md:space-x-2 text-xs md:text-sm text-gray-600 mb-2 md:mb-3">
             <Link href="/investigation" className="flex items-center hover:text-blue-600 transition-colors">
-              <Home className="h-4 w-4 mr-1" />
-              Inicio
+              <Home className="h-3 w-3 md:h-4 md:w-4 mr-1" />
+              <span className="hidden sm:inline">Inicio</span>
             </Link>
-            <ChevronRight className="h-4 w-4" />
+            <ChevronRight className="h-3 w-3 md:h-4 md:w-4" />
             <Link href={`/research?topic=${encodeURIComponent(topic || '')}`} className="flex items-center hover:text-blue-600 transition-colors">
-              <Search className="h-4 w-4 mr-1" />
-              Investigación
+              <Search className="h-3 w-3 md:h-4 md:w-4 mr-1" />
+              <span className="hidden sm:inline">Investigación</span>
             </Link>
-            <ChevronRight className="h-4 w-4" />
+            <ChevronRight className="h-3 w-3 md:h-4 md:w-4" />
             <span className="text-gray-900 font-medium">Artículo</span>
           </nav>
 
           {/* Header Content */}
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2 md:space-x-4 flex-1 min-w-0">
               <div className="flex items-center space-x-2">
-                <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
-                  <Sparkles className="h-5 w-5 text-white" />
+                <div className="w-6 h-6 md:w-8 md:h-8 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
+                  <Sparkles className="h-3 w-3 md:h-5 md:w-5 text-white" />
                 </div>
-                <div>
-                  <h1 className="text-lg font-bold text-gray-900">Infobae AI</h1>
-                  <p className="text-xs text-gray-500">Artículo generado con IA</p>
+                <div className="min-w-0">
+                  <h1 className="text-sm md:text-lg font-bold text-gray-900 truncate">Infobae AI</h1>
+                  <p className="text-xs text-gray-500 hidden md:block">Artículo generado con IA</p>
                 </div>
               </div>
 
-              {/* Article Meta */}
-              <div className="hidden md:flex items-center space-x-4 text-sm text-gray-600">
+              {/* Article Meta - Hidden on mobile, compact on tablet */}
+              <div className="hidden lg:flex items-center space-x-4 text-sm text-gray-600">
                 <div className="flex items-center">
                   <BookOpen className="h-4 w-4 mr-1" />
                   {calculateReadingTime(generatedArticle)} min lectura
@@ -438,13 +456,14 @@ export default function ArticlePageContent() {
               </div>
             </div>
 
-            {/* Header Actions */}
-            <div className="flex items-center space-x-2">
+            {/* Header Actions - Responsive */}
+            <div className="flex items-center space-x-1 md:space-x-2">
+              {/* Mobile: Only essential buttons */}
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={handleBookmark}
-                className={isBookmarked ? 'text-yellow-600' : ''}
+                className={`${isBookmarked ? 'text-yellow-600' : ''} p-2 md:px-3`}
               >
                 <Bookmark className={`h-4 w-4 ${isBookmarked ? 'fill-current' : ''}`} />
               </Button>
@@ -453,7 +472,7 @@ export default function ArticlePageContent() {
                 variant="ghost"
                 size="sm"
                 onClick={handleCopyUrl}
-                className="relative"
+                className="p-2 md:px-3"
               >
                 {copySuccess ? (
                   <CheckCheck className="h-4 w-4 text-green-600" />
@@ -462,20 +481,108 @@ export default function ArticlePageContent() {
                 )}
               </Button>
 
-              <Button variant="ghost" size="sm">
+              {/* Desktop only buttons */}
+              <Button variant="ghost" size="sm" className="hidden md:flex">
                 <Share2 className="h-4 w-4" />
               </Button>
 
-              <Button variant="ghost" size="sm" onClick={handleDownloadText} title="Descargar como texto">
+              <Button variant="ghost" size="sm" onClick={handleDownloadText} title="Descargar como texto" className="hidden md:flex">
                 <Download className="h-4 w-4" />
               </Button>
+              
+              {/* Mobile download menu */}
+              <div className="relative md:hidden mobile-export-menu">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowExportMenu(!showExportMenu)}
+                  className="p-2"
+                >
+                  <Download className="h-4 w-4" />
+                </Button>
+                
+                {showExportMenu && (
+                  <div className="absolute right-0 top-12 w-48 bg-white rounded-lg shadow-lg border z-20">
+                    <div className="p-2">
+                      <button
+                        onClick={() => {
+                          handleDownloadText();
+                          setShowExportMenu(false);
+                        }}
+                        className="flex items-center gap-2 w-full p-3 text-left hover:bg-gray-50 rounded-lg transition-colors text-sm"
+                      >
+                        <Download className="h-4 w-4 text-blue-600" />
+                        Descargar texto
+                      </button>
+                      
+                      <button
+                        onClick={() => {
+                          handleDownloadPDF();
+                          setShowExportMenu(false);
+                        }}
+                        className="flex items-center gap-2 w-full p-3 text-left hover:bg-gray-50 rounded-lg transition-colors text-sm"
+                      >
+                        <FileText className="h-4 w-4 text-red-600" />
+                        Descargar PDF
+                      </button>
+                      
+                      <button
+                        onClick={() => setShowExportMenu(false)}
+                        className="flex items-center gap-2 w-full p-3 text-left hover:bg-gray-50 rounded-lg transition-colors text-sm"
+                      >
+                        <Share2 className="h-4 w-4 text-green-600" />
+                        Compartir
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
       </header>
 
-      <div className="max-w-7xl mx-auto flex">
-        {/* Sidebar - Table of Contents */}
+      <div className="max-w-7xl mx-auto flex flex-col lg:flex-row">
+        {/* Mobile: Table of Contents as collapsible section */}
+        {!loading && tableOfContents.length > 0 && (
+          <div className="lg:hidden bg-white border-b border-gray-200 sticky top-16 z-30">
+            <button
+              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+              className="w-full flex items-center justify-between p-4 text-left hover:bg-gray-50"
+            >
+              <div className="flex items-center">
+                <BookOpen className="h-4 w-4 mr-2 text-blue-600" />
+                <span className="font-medium text-gray-900">Índice del artículo</span>
+              </div>
+              <ChevronRight className={`h-4 w-4 transition-transform ${isSidebarOpen ? 'rotate-90' : ''}`} />
+            </button>
+            
+            {isSidebarOpen && (
+              <div className="border-t border-gray-200 bg-gray-50">
+                <nav className="p-4 space-y-1 max-h-64 overflow-y-auto">
+                  {tableOfContents.map((item) => (
+                    <button
+                      key={item.id}
+                      onClick={() => {
+                        scrollToSection(item.id);
+                        setIsSidebarOpen(false);
+                      }}
+                      className={`w-full text-left px-3 py-2 rounded-md text-sm transition-colors ${
+                        activeSection === item.id
+                          ? 'bg-blue-100 text-blue-900 border-l-2 border-blue-600'
+                          : 'text-gray-600 hover:text-gray-900 hover:bg-white'
+                      } ${item.level === 3 ? 'ml-4' : ''}`}
+                    >
+                      {item.title}
+                    </button>
+                  ))}
+                </nav>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Desktop Sidebar */}
         {!loading && tableOfContents.length > 0 && (
           <aside className={`hidden lg:block sticky top-20 h-fit transition-all duration-300 ${isSidebarOpen ? 'w-80' : 'w-16'}`}>
             <div className="p-4">
@@ -537,45 +644,45 @@ export default function ArticlePageContent() {
 
         {/* Main Content */}
         <main className={`flex-1 ${!loading && tableOfContents.length > 0 ? 'lg:ml-4' : ''}`}>
-          <div className="p-4 md:p-6">
+          <div className="p-3 md:p-4 lg:p-6">
             {/* Article Source Info */}
             {currentArticleTitle && (
-              <Card className="mb-6 border-l-4 border-l-blue-500 bg-gradient-to-r from-blue-50 to-white">
-                <CardHeader>
-                  <div className="flex items-start justify-between">
+              <Card className="mb-4 md:mb-6 border-l-4 border-l-blue-500 bg-gradient-to-r from-blue-50 to-white">
+                <CardHeader className="p-4 md:p-6">
+                  <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between">
                     <div className="flex-1">
-                      <CardTitle className="text-xl mb-3 text-gray-900">
+                      <CardTitle className="text-lg md:text-xl mb-2 md:mb-3 text-gray-900 leading-tight">
                         {currentArticleTitle}
                       </CardTitle>
-                      <CardDescription className="text-base text-gray-700">
+                      <CardDescription className="text-sm md:text-base text-gray-700 mb-3 sm:mb-0">
                         Investigación sobre: <strong>{topic}</strong>
                       </CardDescription>
                       {reasoning && (
                         <div className="mt-3 p-3 bg-white rounded-lg border">
-                          <p className="text-sm text-gray-600">
+                          <p className="text-xs md:text-sm text-gray-600">
                             <strong className="text-gray-900">Criterio de selección:</strong> {reasoning}
                           </p>
                         </div>
                       )}
                     </div>
-                    <div className="ml-4 flex flex-col gap-2">
-                      <Badge variant="secondary" className="bg-green-100 text-green-800">
+                    <div className="ml-0 sm:ml-4 flex flex-row sm:flex-col gap-2 mt-3 sm:mt-0">
+                      <Badge variant="secondary" className="bg-green-100 text-green-800 text-xs">
                         <Star className="h-3 w-3 mr-1" />
                         Recomendado
                       </Badge>
                       {score && (
-                        <Badge variant="outline" className="text-center">
+                        <Badge variant="outline" className="text-center text-xs">
                           Puntuación: {score}%
                         </Badge>
                       )}
                     </div>
                   </div>
                 </CardHeader>
-                <CardContent>
-                  <div className="flex items-center justify-between flex-wrap gap-4">
-                    <div className="flex items-center text-sm text-gray-600 space-x-4">
+                <CardContent className="p-4 md:p-6 pt-0">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
+                    <div className="flex flex-col sm:flex-row sm:items-center text-xs md:text-sm text-gray-600 space-y-2 sm:space-y-0 sm:space-x-4">
                       <div className="flex items-center">
-                        <Clock className="h-4 w-4 mr-2" />
+                        <Clock className="h-3 w-3 md:h-4 md:w-4 mr-2" />
                         <span>
                           {publishedDate 
                             ? `${new Date(publishedDate).toLocaleDateString('es-ES')}`
@@ -589,7 +696,7 @@ export default function ArticlePageContent() {
                         </div>
                       )}
                       <div className="flex items-center">
-                        <BookOpen className="h-4 w-4 mr-1" />
+                        <BookOpen className="h-3 w-3 md:h-4 md:w-4 mr-1" />
                         <span>{calculateReadingTime(generatedArticle)} min</span>
                       </div>
                     </div>
@@ -598,9 +705,9 @@ export default function ArticlePageContent() {
                         href={url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center text-blue-600 hover:text-blue-800 text-sm font-medium"
+                        className="inline-flex items-center text-blue-600 hover:text-blue-800 text-xs md:text-sm font-medium"
                       >
-                        <ExternalLink className="h-4 w-4 mr-1" />
+                        <ExternalLink className="h-3 w-3 md:h-4 md:w-4 mr-1" />
                         Ver fuente original
                       </a>
                     )}
@@ -610,39 +717,42 @@ export default function ArticlePageContent() {
             )}
 
             {/* Title Generation Section */}
-            <Card className="mb-8 bg-gradient-to-r from-yellow-50 to-orange-50 border-l-4 border-l-yellow-400">
-              <CardHeader>
-                <CardTitle className="flex items-center text-lg">
-                  <Lightbulb className="h-5 w-5 mr-2 text-yellow-600" />
+            <Card className="mb-6 md:mb-8 bg-gradient-to-r from-yellow-50 to-orange-50 border-l-4 border-l-yellow-400">
+              <CardHeader className="p-4 md:p-6">
+                <CardTitle className="flex items-center text-base md:text-lg">
+                  <Lightbulb className="h-4 w-4 md:h-5 md:w-5 mr-2 text-yellow-600" />
                   Generador de Títulos Alternativos
                 </CardTitle>
-                <CardDescription>
+                <CardDescription className="text-sm">
                   Experimenta con diferentes títulos para encontrar el más impactante.
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center space-x-3">
-                  <Label htmlFor="numTitles" className="whitespace-nowrap font-medium">Cantidad:</Label>
-                  <Input 
-                    id="numTitles"
-                    type="number" 
-                    value={numTitlesToGenerate} 
-                    onChange={(e) => setNumTitlesToGenerate(Math.max(1, Math.min(10, parseInt(e.target.value, 10))))} 
-                    min="1" 
-                    max="10"
-                    className="w-20"
-                  />
-                  <Button 
-                    onClick={handleGenerateTitles} 
-                    disabled={isGeneratingTitles || !content}
-                    className="bg-yellow-600 hover:bg-yellow-700"
-                  >
-                    {isGeneratingTitles ? (
-                      <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Generando...</>
-                    ) : (
-                      'Generar Títulos'
-                    )}
-                  </Button>
+              <CardContent className="space-y-4 p-4 md:p-6 pt-0">
+                <div className="flex flex-col sm:flex-row sm:items-center space-y-3 sm:space-y-0 sm:space-x-3">
+                  <Label htmlFor="numTitles" className="whitespace-nowrap font-medium text-sm">Cantidad:</Label>
+                  <div className="flex items-center space-x-3 flex-1">
+                    <Input 
+                      id="numTitles"
+                      type="number" 
+                      value={numTitlesToGenerate} 
+                      onChange={(e) => setNumTitlesToGenerate(Math.max(1, Math.min(10, parseInt(e.target.value, 10))))} 
+                      min="1" 
+                      max="10"
+                      className="w-20"
+                    />
+                    <Button 
+                      onClick={handleGenerateTitles} 
+                      disabled={isGeneratingTitles || !content}
+                      className="bg-yellow-600 hover:bg-yellow-700 flex-1 sm:flex-none"
+                      size="sm"
+                    >
+                      {isGeneratingTitles ? (
+                        <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Generando...</>
+                      ) : (
+                        'Generar Títulos'
+                      )}
+                    </Button>
+                  </div>
                 </div>
 
                 {titleError && (
@@ -653,12 +763,12 @@ export default function ArticlePageContent() {
 
                 {suggestedTitles.length > 0 && (
                   <div className="space-y-3 pt-4">
-                    <h4 className="font-medium text-gray-800">Títulos Sugeridos:</h4>
+                    <h4 className="font-medium text-gray-800 text-sm md:text-base">Títulos Sugeridos:</h4>
                     <RadioGroup value={currentArticleTitle || undefined} onValueChange={handleTitleSelection}>
                       {suggestedTitles.map((sTitle, index) => (
-                        <div key={index} className="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg hover:bg-white transition-colors">
-                          <RadioGroupItem value={sTitle} id={`title-${index}`} />
-                          <Label htmlFor={`title-${index}`} className="font-normal cursor-pointer flex-1 text-gray-800">
+                        <div key={index} className="flex items-start space-x-3 p-3 border border-gray-200 rounded-lg hover:bg-white transition-colors">
+                          <RadioGroupItem value={sTitle} id={`title-${index}`} className="mt-0.5" />
+                          <Label htmlFor={`title-${index}`} className="font-normal cursor-pointer flex-1 text-gray-800 text-sm leading-relaxed">
                             {sTitle}
                           </Label>
                         </div>
@@ -675,33 +785,33 @@ export default function ArticlePageContent() {
             {/* Article Content */}
             <div className="bg-white rounded-xl shadow-lg overflow-hidden border">
               {/* Article Header */}
-              <div className="bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 p-8 text-white relative overflow-hidden">
+              <div className="bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 p-4 md:p-8 text-white relative overflow-hidden">
                 <div className="absolute inset-0 bg-black opacity-10"></div>
                 <div className="relative z-10">
-                  <div className="flex items-center mb-4">
-                    <Sparkles className="h-6 w-6 mr-2" />
-                    <span className="text-sm font-medium opacity-90">Artículo Generado con IA</span>
+                  <div className="flex items-center mb-3 md:mb-4">
+                    <Sparkles className="h-4 w-4 md:h-6 md:w-6 mr-2" />
+                    <span className="text-xs md:text-sm font-medium opacity-90">Artículo Generado con IA</span>
                   </div>
-                  <h1 className="text-3xl md:text-4xl font-bold leading-tight mb-4">
+                  <h1 className="text-xl md:text-3xl lg:text-4xl font-bold leading-tight mb-3 md:mb-4">
                     {currentArticleTitle || `Investigación sobre ${topic}`}
                   </h1>
-                  <p className="text-lg opacity-90 max-w-3xl">
+                  <p className="text-sm md:text-lg opacity-90 max-w-3xl">
                     Análisis detallado basado en investigación avanzada sobre <strong>{topic}</strong>
                   </p>
                   
                   {/* Article Stats */}
-                  <div className="flex items-center space-x-6 mt-6 text-sm opacity-90">
+                  <div className="flex flex-wrap items-center gap-3 md:gap-6 mt-4 md:mt-6 text-xs md:text-sm opacity-90">
                     <div className="flex items-center">
-                      <Clock className="h-4 w-4 mr-1" />
+                      <Clock className="h-3 w-3 md:h-4 md:w-4 mr-1" />
                       {calculateReadingTime(generatedArticle)} min de lectura
                     </div>
                     <div className="flex items-center">
-                      <BookOpen className="h-4 w-4 mr-1" />
+                      <BookOpen className="h-3 w-3 md:h-4 md:w-4 mr-1" />
                       {generatedArticle.split(' ').length} palabras
                     </div>
                     {publishedDate && (
                       <div className="flex items-center">
-                        <Calendar className="h-4 w-4 mr-1" />
+                        <Calendar className="h-3 w-3 md:h-4 md:w-4 mr-1" />
                         {new Date(publishedDate).toLocaleDateString('es-ES')}
                       </div>
                     )}
@@ -710,7 +820,7 @@ export default function ArticlePageContent() {
               </div>
 
               {/* Article Body */}
-              <div className="p-8 md:p-12" ref={articleRef}>
+              <div className="p-4 md:p-8 lg:p-12" ref={articleRef}>
                 {loading ? (
                   <div className="flex flex-col items-center justify-center py-16">
                     <div className="relative">
@@ -813,73 +923,73 @@ export default function ArticlePageContent() {
             </div>
 
             {/* Enhanced Actions Section */}
-            <div className="mt-8 bg-white rounded-xl shadow-lg border p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">¿Te resultó útil este artículo?</h3>
+            <div className="mt-6 md:mt-8 bg-white rounded-xl shadow-lg border p-4 md:p-6">
+              <h3 className="text-base md:text-lg font-semibold text-gray-900 mb-3 md:mb-4">¿Te resultó útil este artículo?</h3>
               
-              <div className="grid md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 {/* Quick Actions */}
                 <div className="space-y-3">
-                  <h4 className="font-medium text-gray-800 mb-3">Acciones rápidas</h4>
-                  <div className="flex flex-wrap gap-2">
+                  <h4 className="font-medium text-gray-800 mb-3 text-sm md:text-base">Acciones rápidas</h4>
+                  <div className="grid grid-cols-2 gap-2 md:flex md:flex-wrap md:gap-2">
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={handleBookmark}
-                      className={`${isBookmarked ? 'bg-yellow-50 border-yellow-300 text-yellow-700' : ''}`}
+                      className={`${isBookmarked ? 'bg-yellow-50 border-yellow-300 text-yellow-700' : ''} text-xs md:text-sm`}
                     >
-                      <Bookmark className={`h-4 w-4 mr-1 ${isBookmarked ? 'fill-current' : ''}`} />
+                      <Bookmark className={`h-3 w-3 md:h-4 md:w-4 mr-1 ${isBookmarked ? 'fill-current' : ''}`} />
                       {isBookmarked ? 'Guardado' : 'Guardar'}
                     </Button>
                     
-                    <Button variant="outline" size="sm" onClick={handleCopyUrl}>
+                    <Button variant="outline" size="sm" onClick={handleCopyUrl} className="text-xs md:text-sm">
                       {copySuccess ? (
                         <>
-                          <CheckCheck className="h-4 w-4 mr-1 text-green-600" />
+                          <CheckCheck className="h-3 w-3 md:h-4 md:w-4 mr-1 text-green-600" />
                           Copiado
                         </>
                       ) : (
                         <>
-                          <Copy className="h-4 w-4 mr-1" />
+                          <Copy className="h-3 w-3 md:h-4 md:w-4 mr-1" />
                           Copiar enlace
                         </>
                       )}
                     </Button>
                     
-                    <Button variant="outline" size="sm">
-                      <Share2 className="h-4 w-4 mr-1" />
+                    <Button variant="outline" size="sm" className="text-xs md:text-sm">
+                      <Share2 className="h-3 w-3 md:h-4 md:w-4 mr-1" />
                       Compartir
                     </Button>
                     
-                    <Button variant="outline" size="sm" onClick={handleDownloadPDF} title="Descargar como PDF">
-                      <Download className="h-4 w-4 mr-1" />
-                      Descargar PDF
+                    <Button variant="outline" size="sm" onClick={handleDownloadPDF} className="text-xs md:text-sm">
+                      <Download className="h-3 w-3 md:h-4 md:w-4 mr-1" />
+                      <span className="hidden sm:inline">Descargar </span>PDF
                     </Button>
                   </div>
                 </div>
 
                 {/* Navigation */}
                 <div className="space-y-3">
-                  <h4 className="font-medium text-gray-800 mb-3">Continuar investigando</h4>
+                  <h4 className="font-medium text-gray-800 mb-3 text-sm md:text-base">Continuar investigando</h4>
                   <div className="space-y-2">
                     <Link href={`/research?topic=${encodeURIComponent(topic)}`}>
-                      <Button variant="outline" className="w-full justify-start">
-                        <Search className="h-4 w-4 mr-2" />
-                        Ver más resultados sobre {topic}
+                      <Button variant="outline" className="w-full justify-start text-xs md:text-sm h-10 md:h-auto">
+                        <Search className="h-3 w-3 md:h-4 md:w-4 mr-2" />
+                        <span className="truncate">Ver más resultados sobre {topic}</span>
                       </Button>
                     </Link>
                     
                     {url && (
                       <a href={url} target="_blank" rel="noopener noreferrer" className="block">
-                        <Button variant="outline" className="w-full justify-start">
-                          <ExternalLink className="h-4 w-4 mr-2" />
+                        <Button variant="outline" className="w-full justify-start text-xs md:text-sm h-10 md:h-auto">
+                          <ExternalLink className="h-3 w-3 md:h-4 md:w-4 mr-2" />
                           Leer fuente original
                         </Button>
                       </a>
                     )}
                     
                     <Link href="/investigation">
-                      <Button variant="outline" className="w-full justify-start">
-                        <Home className="h-4 w-4 mr-2" />
+                      <Button variant="outline" className="w-full justify-start text-xs md:text-sm h-10 md:h-auto">
+                        <Home className="h-3 w-3 md:h-4 md:w-4 mr-2" />
                         Nueva investigación
                       </Button>
                     </Link>
