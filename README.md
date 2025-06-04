@@ -86,7 +86,11 @@ src/
 │   ├── investigation/   # Página de búsqueda
 │   └── article/         # Generación de artículos
 ├── 🧩 components/       # Componentes UI
-└── 🔧 hooks/           # Hooks personalizados
+├── 🔧 hooks/           # Hooks personalizados
+│   ├── useCategorizationRules.ts  # Gestión de reglas personalizadas
+│   ├── useExcelExport.ts          # Exportación a Excel/CSV
+│   └── useResearchCache.ts        # Cache de investigaciones
+└── 
 ```
 
 ### 🔄 Flujo de Funcionamiento

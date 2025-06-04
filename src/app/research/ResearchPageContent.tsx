@@ -7,8 +7,9 @@ import { performResearch, categorizeResearchResults } from '@/app/actions/resear
 import type { CategorizedResult, CustomCategorizationRules } from '@/types';
 import { useResearchCache } from '@/hooks/useResearchCache';
 import { useCategorizationRules } from '@/hooks/useCategorizationRules';
+import { useExcelExport } from '@/hooks/useExcelExport';
 import { CategorizationRulesConfig } from '@/components/CategorizationRulesConfig';
-import { RefreshCw, Settings } from 'lucide-react';
+import { RefreshCw, Settings, Download, FileSpreadsheet, FileText, FileBarChart } from 'lucide-react';
 import Link from 'next/link';
 
 export default function ResearchPageContent() {
@@ -17,6 +18,7 @@ export default function ResearchPageContent() {
   const topic = searchParams.get('topic');
   const { getCache, setCache, clearCache } = useResearchCache();
   const { activeRule } = useCategorizationRules();
+  const { exportToExcel, exportSimpleList, exportAsCSV } = useExcelExport();
 
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -32,6 +34,7 @@ export default function ResearchPageContent() {
   });
   const [error, setError] = useState<string | null>(null);
   const [showConfigModal, setShowConfigModal] = useState(false);
+  const [showExportMenu, setShowExportMenu] = useState(false);
 
   const fetchResearch = useCallback(async (forceRefresh: boolean = false, customRules?: CustomCategorizationRules) => {
     if (!topic) return;
@@ -56,10 +59,13 @@ export default function ResearchPageContent() {
         setIsLoading(false);
         setIsRefreshing(false);
       }, 500);
+      console.log('♻️ Resultados cargados desde cache para:', topic);
       return;
     }
 
     try {
+      console.log('🌐 Realizando nueva investigación para:', topic);
+      
       // Usar reglas personalizadas o reglas activas
       const rulesToUse = customRules || activeRule;
       
@@ -92,6 +98,43 @@ export default function ResearchPageContent() {
     fetchResearch(true, newRules);
   };
 
+  const handleExportExcel = () => {
+    if (!topic) return;
+    
+    exportToExcel({
+      expandWorthy: categorizedResults.expandWorthy,
+      notExpandWorthy: categorizedResults.notExpandWorthy,
+      topic
+    });
+    setShowExportMenu(false);
+  };
+
+  const handleExportSimple = () => {
+    if (!topic) return;
+    
+    exportSimpleList({
+      expandWorthy: categorizedResults.expandWorthy,
+      notExpandWorthy: categorizedResults.notExpandWorthy,
+      topic
+    });
+    setShowExportMenu(false);
+  };
+
+  const handleExportCSV = () => {
+    if (!topic) return;
+    
+    exportAsCSV({
+      expandWorthy: categorizedResults.expandWorthy,
+      notExpandWorthy: categorizedResults.notExpandWorthy,
+      topic
+    });
+    setShowExportMenu(false);
+  };
+
+  const handleRefreshInvestigation = () => {
+    fetchResearch(true);
+  };
+
   useEffect(() => {
     if (!topic) {
       router.push('/investigation');
@@ -100,6 +143,23 @@ export default function ResearchPageContent() {
 
     fetchResearch();
   }, [topic, router, fetchResearch]);
+
+  // Cerrar menú de exportación al hacer clic fuera
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (showExportMenu) {
+        const target = event.target as Element;
+        if (!target.closest('.export-menu-container')) {
+          setShowExportMenu(false);
+        }
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showExportMenu]);
 
   // Simular progreso de carga dinámico
   useEffect(() => {
@@ -167,10 +227,6 @@ export default function ResearchPageContent() {
       reasoning: result.reasoning || ''
     });
     router.push(`/article?${params.toString()}`);
-  };
-
-  const handleRefreshInvestigation = () => {
-    fetchResearch(true);
   };
 
   if (!topic) {
@@ -310,6 +366,72 @@ export default function ResearchPageContent() {
             )}
           </p>
         </div>
+
+        {/* Sección de Exportación */}
+        {results.length > 0 && (
+          <div className="bg-white rounded-lg shadow-sm border p-4 mb-8">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-1">Exportar Resultados</h3>
+                <p className="text-sm text-gray-600">
+                  Descarga los resultados de la investigación en diferentes formatos
+                </p>
+              </div>
+              
+              <div className="flex items-center gap-3">
+                <div className="relative">
+                  <Button
+                    onClick={() => setShowExportMenu(!showExportMenu)}
+                    variant="outline"
+                    className="flex items-center gap-2"
+                  >
+                    <Download className="h-4 w-4" />
+                    Exportar
+                  </Button>
+                  
+                  {showExportMenu && (
+                    <div className="export-menu-container absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border z-10">
+                      <div className="p-2">
+                        <button
+                          onClick={handleExportExcel}
+                          className="flex items-center gap-3 w-full p-3 text-left hover:bg-gray-50 rounded-lg transition-colors"
+                        >
+                          <FileSpreadsheet className="h-4 w-4 text-green-600" />
+                          <div>
+                            <div className="font-medium text-gray-900">Excel Completo</div>
+                            <div className="text-xs text-gray-500">Con resumen y hojas separadas</div>
+                          </div>
+                        </button>
+                        
+                        <button
+                          onClick={handleExportSimple}
+                          className="flex items-center gap-3 w-full p-3 text-left hover:bg-gray-50 rounded-lg transition-colors"
+                        >
+                          <FileText className="h-4 w-4 text-blue-600" />
+                          <div>
+                            <div className="font-medium text-gray-900">Lista Simple</div>
+                            <div className="text-xs text-gray-500">Solo título, URL y puntuación</div>
+                          </div>
+                        </button>
+                        
+                        <button
+                          onClick={handleExportCSV}
+                          className="flex items-center gap-3 w-full p-3 text-left hover:bg-gray-50 rounded-lg transition-colors"
+                        >
+                          <FileBarChart className="h-4 w-4 text-orange-600" />
+                          <div>
+                            <div className="font-medium text-gray-900">CSV</div>
+                            <div className="text-xs text-gray-500">Para análisis en otras herramientas</div>
+                          </div>
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         <div className="grid md:grid-cols-2 gap-8">
           {/* Contenido que vale la pena expandir */}

@@ -19,7 +19,6 @@ export async function performResearch(
     return results;
   } catch (error) {
     console.error('Error en performResearch:', error);
-    
     // Manejo específico para errores de timeout
     if (error instanceof Error && error.message.includes('Timeout')) {
       throw new Error(`⏱️ ${error.message.replace('45 segundos', '30 segundos')}`);

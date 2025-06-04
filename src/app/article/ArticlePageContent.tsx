@@ -98,7 +98,7 @@ export default function ArticlePageContent() {
   const [generatedArticle, setGeneratedArticle] = useState<string>('');
   const [currentArticleTitle, setCurrentArticleTitle] = useState<string | null>(initialTitle);
 
-  // State for title generation
+  // Estado para la generación de títulos
   const [numTitlesToGenerate, setNumTitlesToGenerate] = useState<number>(3);
   const [suggestedTitles, setSuggestedTitles] = useState<string[]>([]);
   const [isGeneratingTitles, setIsGeneratingTitles] = useState<boolean>(false);
@@ -115,14 +115,14 @@ export default function ArticlePageContent() {
   }, [topic, currentArticleTitle, content, reasoning, publishedDate, score, url, author]);
 
   useEffect(() => {
-    // Initial article generation
+    // Generación inicial del artículo
     setLoading(true);
     const timer = setTimeout(() => {
       generateAndSetArticle();
-    }, 500); // Reduced initial timer, actual content generation is quick
+    }, 500); // Temporizador reducido, la generación de contenido es rápida
 
     return () => clearTimeout(timer);
-  }, [generateAndSetArticle]); // Rerun if title changes
+  }, [generateAndSetArticle]); // Vuelve a ejecutar si el título cambia
 
   const handleGenerateTitles = async () => {
     if (!content || numTitlesToGenerate <= 0) {
