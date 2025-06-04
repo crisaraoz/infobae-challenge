@@ -621,7 +621,7 @@ export default function ArticlePageContent() {
                     title={isSidebarOpen ? "Contraer índice" : "Expandir índice"}
                   >
                     <BookOpen className="h-4 w-4" />
-                  </Button>
+            </Button>
                 </div>
                 
                 {isSidebarOpen && (
@@ -666,51 +666,51 @@ export default function ArticlePageContent() {
         <main className={`flex-1 ${!loading && tableOfContents.length > 0 ? 'lg:ml-4' : ''}`}>
           <div className="p-3 md:p-4 lg:p-6">
             {/* Article Source Info */}
-            {currentArticleTitle && (
+          {currentArticleTitle && (
               <Card className="mb-4 md:mb-6 border-l-4 border-l-blue-500 bg-gradient-to-r from-blue-50 to-white">
                 <CardHeader className="p-4 md:p-6">
                   <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between">
-                    <div className="flex-1">
+                  <div className="flex-1">
                       <CardTitle className="text-lg md:text-xl mb-2 md:mb-3 text-gray-900 leading-tight">
-                        {currentArticleTitle}
+                      {currentArticleTitle}
                       </CardTitle>
                       <CardDescription className="text-sm md:text-base text-gray-700 mb-3 sm:mb-0">
                         Investigación sobre: <strong>{topic}</strong>
-                      </CardDescription>
-                      {reasoning && (
+                    </CardDescription>
+                    {reasoning && (
                         <div className="mt-3 p-3 bg-white rounded-lg border">
                           <p className="text-xs md:text-sm text-gray-600">
                             <strong className="text-gray-900">Criterio de selección:</strong> {reasoning}
-                          </p>
+                      </p>
                         </div>
-                      )}
-                    </div>
+                    )}
+                  </div>
                     <div className="ml-0 sm:ml-4 flex flex-row sm:flex-col gap-2 mt-3 sm:mt-0">
                       <Badge variant="secondary" className="bg-green-100 text-green-800 text-xs">
-                        <Star className="h-3 w-3 mr-1" />
+                      <Star className="h-3 w-3 mr-1" />
                         Recomendado
-                      </Badge>
-                      {score && (
+                    </Badge>
+                    {score && (
                         <Badge variant="outline" className="text-center text-xs">
-                          Puntuación: {score}%
-                        </Badge>
-                      )}
-                    </div>
+                        Puntuación: {score}%
+                      </Badge>
+                    )}
                   </div>
-                </CardHeader>
+                </div>
+              </CardHeader>
                 <CardContent className="p-4 md:p-6 pt-0">
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
                     <div className="flex flex-col sm:flex-row sm:items-center text-xs md:text-sm text-gray-600 space-y-2 sm:space-y-0 sm:space-x-4">
                       <div className="flex items-center">
                         <Clock className="h-3 w-3 md:h-4 md:w-4 mr-2" />
-                        <span>
-                          {publishedDate 
+                    <span>
+                      {publishedDate 
                             ? `${new Date(publishedDate).toLocaleDateString('es-ES')}`
                             : 'Generado hoy'
-                          }
-                        </span>
+                      }
+                    </span>
                       </div>
-                      {author && (
+                    {author && (
                         <div className="flex items-center">
                           <span className="font-medium">Por: {author}</span>
                         </div>
@@ -719,88 +719,88 @@ export default function ArticlePageContent() {
                         <BookOpen className="h-3 w-3 md:h-4 md:w-4 mr-1" />
                         <span>{calculateReadingTime(generatedArticle)} min</span>
                       </div>
-                    </div>
-                    {url && (
-                      <a
-                        href={url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center text-blue-600 hover:text-blue-800 text-xs md:text-sm font-medium"
-                      >
-                        <ExternalLink className="h-3 w-3 md:h-4 md:w-4 mr-1" />
-                        Ver fuente original
-                      </a>
-                    )}
                   </div>
-                </CardContent>
-              </Card>
-            )}
+                  {url && (
+                    <a
+                      href={url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                        className="inline-flex items-center text-blue-600 hover:text-blue-800 text-xs md:text-sm font-medium"
+                    >
+                        <ExternalLink className="h-3 w-3 md:h-4 md:w-4 mr-1" />
+                      Ver fuente original
+                    </a>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
-            {/* Title Generation Section */}
+        {/* Title Generation Section */}
             <Card className="mb-6 md:mb-8 bg-gradient-to-r from-yellow-50 to-orange-50 border-l-4 border-l-yellow-400">
               <CardHeader className="p-4 md:p-6">
                 <CardTitle className="flex items-center text-base md:text-lg">
                   <Lightbulb className="h-4 w-4 md:h-5 md:w-5 mr-2 text-yellow-600" />
                   Generador de Títulos Alternativos
-                </CardTitle>
+            </CardTitle>
                 <CardDescription className="text-sm">
                   Experimenta con diferentes títulos para encontrar el más impactante.
-                </CardDescription>
-              </CardHeader>
+            </CardDescription>
+          </CardHeader>
               <CardContent className="space-y-4 p-4 md:p-6 pt-0">
                 <div className="flex flex-col sm:flex-row sm:items-center space-y-3 sm:space-y-0 sm:space-x-3">
                   <Label htmlFor="numTitles" className="whitespace-nowrap font-medium text-sm">Cantidad:</Label>
                   <div className="flex items-center space-x-3 flex-1">
-                    <Input 
-                      id="numTitles"
-                      type="number" 
-                      value={numTitlesToGenerate} 
-                      onChange={(e) => setNumTitlesToGenerate(Math.max(1, Math.min(10, parseInt(e.target.value, 10))))} 
-                      min="1" 
-                      max="10"
-                      className="w-20"
-                    />
+              <Input 
+                id="numTitles"
+                type="number" 
+                value={numTitlesToGenerate} 
+                onChange={(e) => setNumTitlesToGenerate(Math.max(1, Math.min(10, parseInt(e.target.value, 10))))} 
+                min="1" 
+                max="10"
+                className="w-20"
+              />
                     <Button 
                       onClick={handleGenerateTitles} 
                       disabled={isGeneratingTitles || !content}
                       className="bg-yellow-600 hover:bg-yellow-700 flex-1 sm:flex-none"
                       size="sm"
                     >
-                      {isGeneratingTitles ? (
-                        <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Generando...</>
-                      ) : (
-                        'Generar Títulos'
-                      )}
-                    </Button>
-                  </div>
-                </div>
-
-                {titleError && (
-                  <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
-                    <p className="text-sm text-red-600">Error: {titleError}</p>
-                  </div>
+                {isGeneratingTitles ? (
+                  <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Generando...</>
+                ) : (
+                  'Generar Títulos'
                 )}
+              </Button>
+                  </div>
+            </div>
 
-                {suggestedTitles.length > 0 && (
-                  <div className="space-y-3 pt-4">
+            {titleError && (
+                  <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
+              <p className="text-sm text-red-600">Error: {titleError}</p>
+                  </div>
+            )}
+
+            {suggestedTitles.length > 0 && (
+              <div className="space-y-3 pt-4">
                     <h4 className="font-medium text-gray-800 text-sm md:text-base">Títulos Sugeridos:</h4>
-                    <RadioGroup value={currentArticleTitle || undefined} onValueChange={handleTitleSelection}>
-                      {suggestedTitles.map((sTitle, index) => (
+                <RadioGroup value={currentArticleTitle || undefined} onValueChange={handleTitleSelection}>
+                  {suggestedTitles.map((sTitle, index) => (
                         <div key={index} className="flex items-start space-x-3 p-3 border border-gray-200 rounded-lg hover:bg-white transition-colors">
                           <RadioGroupItem value={sTitle} id={`title-${index}`} className="mt-0.5" />
                           <Label htmlFor={`title-${index}`} className="font-normal cursor-pointer flex-1 text-gray-800 text-sm leading-relaxed">
-                            {sTitle}
-                          </Label>
-                        </div>
-                      ))}
-                    </RadioGroup>
+                        {sTitle}
+                      </Label>
+                    </div>
+                  ))}
+                </RadioGroup>
                     <p className="text-xs text-gray-500 bg-white p-2 rounded border">
                       💡 Selecciona un título para regenerar automáticamente el artículo.
                     </p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
             {/* Article Content */}
             <div className="bg-white rounded-xl shadow-lg overflow-hidden border">
@@ -811,10 +811,10 @@ export default function ArticlePageContent() {
                   <div className="flex items-center mb-3 md:mb-4">
                     <Sparkles className="h-4 w-4 md:h-6 md:w-6 mr-2" />
                     <span className="text-xs md:text-sm font-medium opacity-90">Artículo Generado con IA</span>
-                  </div>
+            </div>
                   <h1 className="text-xl md:text-3xl lg:text-4xl font-bold leading-tight mb-3 md:mb-4">
-                    {currentArticleTitle || `Investigación sobre ${topic}`}
-                  </h1>
+              {currentArticleTitle || `Investigación sobre ${topic}`}
+            </h1>
                   <p className="text-sm md:text-lg opacity-90 max-w-3xl">
                     Análisis detallado basado en investigación avanzada sobre <strong>{topic}</strong>
                   </p>
@@ -836,12 +836,12 @@ export default function ArticlePageContent() {
                       </div>
                     )}
                   </div>
-                </div>
-              </div>
+          </div>
+          </div>
 
               {/* Article Body */}
               <div className="p-4 md:p-8 lg:p-12" ref={articleRef}>
-                {loading ? (
+            {loading ? (
                   <div className="flex flex-col items-center justify-center py-16">
                     <div className="relative">
                       <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600"></div>
@@ -849,98 +849,98 @@ export default function ArticlePageContent() {
                     </div>
                     <p className="text-xl text-gray-700 mt-6 font-medium">Generando artículo estructurado...</p>
                     <p className="text-sm text-gray-500 mt-2">Procesando y organizando la información</p>
-                  </div>
-                ) : (
+              </div>
+            ) : (
                   <article className="prose prose-lg prose-blue max-w-none">
                     <div className="space-y-8">
-                      {generatedArticle.split('\n').map((line, index) => {
-                        if (line.trim() === '') return <br key={index} />;
-                        
-                        if (line.startsWith('# ')) {
-                          return (
+                  {generatedArticle.split('\n').map((line, index) => {
+                    if (line.trim() === '') return <br key={index} />;
+                    
+                    if (line.startsWith('# ')) {
+                      return (
                             <h1 
                               key={index} 
                               id={`section-${index}`}
                               className="text-4xl font-bold mb-8 text-gray-900 border-b-2 border-gray-200 pb-4"
                             >
-                              {line.replace('# ', '')}
-                            </h1>
-                          );
-                        }
-                        if (line.startsWith('## ')) {
-                          return (
+                          {line.replace('# ', '')}
+                        </h1>
+                      );
+                    }
+                    if (line.startsWith('## ')) {
+                      return (
                             <h2 
                               key={index} 
                               id={`section-${index}`}
                               className="text-3xl font-semibold mb-6 mt-12 text-gray-800 border-l-4 border-blue-500 pl-4 bg-blue-50 py-3 rounded-r-lg"
                             >
-                              {line.replace('## ', '')}
-                            </h2>
-                          );
-                        }
-                        if (line.startsWith('### ')) {
-                          return (
+                          {line.replace('## ', '')}
+                        </h2>
+                      );
+                    }
+                    if (line.startsWith('### ')) {
+                      return (
                             <h3 
                               key={index} 
                               id={`section-${index}`}
                               className="text-2xl font-semibold mb-4 mt-8 text-gray-700 border-l-2 border-purple-400 pl-3"
                             >
-                              {line.replace('### ', '')}
-                            </h3>
-                          );
-                        }
-                        if (line.match(/^\d+\.\s/)) {
-                          return (
+                          {line.replace('### ', '')}
+                        </h3>
+                      );
+                    }
+                    if (line.match(/^\d+\.\s/)) {
+                      return (
                             <li key={index} className="mb-3 text-gray-700 list-decimal list-inside bg-gray-50 p-3 rounded-lg">
-                              {line.replace(/^\d+\.\s/, '')}
-                            </li>
-                          );
-                        }
-                        if (line.startsWith('- ')) {
-                          return (
+                          {line.replace(/^\d+\.\s/, '')}
+                        </li>
+                      );
+                    }
+                    if (line.startsWith('- ')) {
+                      return (
                             <li key={index} className="mb-3 text-gray-700 list-disc list-inside ml-4 relative">
                               <span className="absolute -left-4 text-blue-600">•</span>
-                              {line.replace('- ', '')}
-                            </li>
-                          );
-                        }
-                        if (line.startsWith('---')) {
+                          {line.replace('- ', '')}
+                        </li>
+                      );
+                    }
+                    if (line.startsWith('---')) {
                           return <hr key={index} className="my-12 border-gray-300 border-t-2" />;
-                        }
-                        if (line.startsWith('*') && line.endsWith('*')) {
-                          return (
+                    }
+                    if (line.startsWith('*') && line.endsWith('*')) {
+                      return (
                             <div key={index} className="my-8 p-6 bg-gradient-to-r from-gray-50 to-blue-50 border-l-4 border-gray-400 rounded-r-lg">
                               <p className="text-sm text-gray-600 italic">
-                                {line.replace(/^\*/, '').replace(/\*$/, '')}
-                              </p>
+                          {line.replace(/^\*/, '').replace(/\*$/, '')}
+                        </p>
                             </div>
-                          );
-                        }
-                        
-                        // Procesar texto con markdown básico
-                        const processMarkdown = (text: string) => {
-                          const parts = text.split(/(\*\*[^*]+\*\*)/);
-                          return parts.map((part, i) => 
-                            part.startsWith('**') && part.endsWith('**') 
+                      );
+                    }
+                    
+                    // Procesar texto con markdown básico
+                    const processMarkdown = (text: string) => {
+                      const parts = text.split(/(\*\*[^*]+\*\*)/);
+                      return parts.map((part, i) => 
+                        part.startsWith('**') && part.endsWith('**') 
                               ? <strong key={i} className="text-gray-900 bg-yellow-100 px-1 rounded">{part.slice(2, -2)}</strong> 
-                              : part
-                          );
-                        };
-                        
-                        if (line.trim()) {
-                          return (
+                          : part
+                      );
+                    };
+                    
+                    if (line.trim()) {
+                      return (
                             <p key={index} className="mb-6 text-gray-700 leading-relaxed text-lg">
-                              {processMarkdown(line)}
-                            </p>
-                          );
-                        }
-                        return null;
-                      }).filter(Boolean)}
-                    </div>
-                  </article>
-                )}
-              </div>
-            </div>
+                          {processMarkdown(line)}
+                        </p>
+                      );
+                    }
+                    return null;
+                  }).filter(Boolean)}
+                </div>
+              </article>
+            )}
+          </div>
+        </div>
 
             {/* Enhanced Actions Section */}
             <div className="mt-6 md:mt-8 bg-white rounded-xl shadow-lg border p-4 md:p-6">
@@ -991,21 +991,21 @@ export default function ArticlePageContent() {
                 <div className="space-y-3">
                   <h4 className="font-medium text-gray-800 mb-3 text-sm md:text-base">Continuar investigando</h4>
                   <div className="space-y-2">
-                    <Link href={`/research?topic=${encodeURIComponent(topic)}`}>
+          <Link href={`/research?topic=${encodeURIComponent(topic)}`}>
                       <Button variant="outline" className="w-full justify-start text-xs md:text-sm h-10 md:h-auto">
                         <Search className="h-3 w-3 md:h-4 md:w-4 mr-2" />
                         <span className="truncate">Ver más resultados sobre {topic}</span>
-                      </Button>
-                    </Link>
+            </Button>
+          </Link>
                     
-                    {url && (
+          {url && (
                       <a href={url} target="_blank" rel="noopener noreferrer" className="block">
                         <Button variant="outline" className="w-full justify-start text-xs md:text-sm h-10 md:h-auto">
                           <ExternalLink className="h-3 w-3 md:h-4 md:w-4 mr-2" />
-                          Leer fuente original
-                        </Button>
-                      </a>
-                    )}
+                Leer fuente original
+              </Button>
+            </a>
+          )}
                     
                     <Link href={getBackUrl()}>
                       <Button variant="outline" className="w-full justify-start text-xs md:text-sm h-10 md:h-auto">
@@ -1016,9 +1016,9 @@ export default function ArticlePageContent() {
                   </div>
                 </div>
               </div>
-            </div>
-          </div>
-        </main>
+        </div>
+      </div>
+    </main>
       </div>
     </div>
   );

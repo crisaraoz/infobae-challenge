@@ -85,7 +85,7 @@ export default function ResearchPageContent() {
       
       // Solo cachear si no se usan reglas personalizadas temporales
       if (!customRules) {
-        setCache(topic, { results, categorized, timestamp: Date.now() });
+      setCache(topic, { results, categorized, timestamp: Date.now() });
       }
       
       // Completar progreso
@@ -488,12 +488,12 @@ export default function ResearchPageContent() {
 
           {/* Desktop Header Layout */}
           <div className="hidden md:block">
-            <div className="flex justify-between items-center mb-4">
-              <Link href="/investigation?show=topics">
-                <Button variant="outline">
-                  ← Volver a investigación
-                </Button>
-              </Link>
+          <div className="flex justify-between items-center mb-4">
+            <Link href="/investigation?show=topics">
+              <Button variant="outline">
+                ← Volver a investigación
+              </Button>
+            </Link>
               
               <div className="flex items-center gap-2">
                 {/* Controles de vista */}
@@ -526,31 +526,31 @@ export default function ResearchPageContent() {
                   <Settings className="h-4 w-4" />
                   Configurar Reglas
                 </Button>
-                
-                <Button 
-                  onClick={handleRefreshInvestigation}
-                  disabled={isRefreshing}
-                  variant="outline"
-                  className="flex items-center gap-2"
-                >
-                  <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-                  {isRefreshing ? 'Actualizando...' : 'Nueva Investigación'}
-                </Button>
-              </div>
-            </div>
             
-            <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
-              Resultados para: {topic}
-            </h1>
-            <p className="text-gray-600">
-              {results.length} resultados encontrados y categorizados
-              {isRefreshing && (
-                <span className="ml-2 text-blue-600 font-medium">
-                  • Actualizando resultados...
-                </span>
-              )}
-            </p>
+            <Button 
+              onClick={handleRefreshInvestigation}
+              disabled={isRefreshing}
+              variant="outline"
+              className="flex items-center gap-2"
+            >
+              <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+              {isRefreshing ? 'Actualizando...' : 'Nueva Investigación'}
+            </Button>
+              </div>
           </div>
+          
+          <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
+            Resultados para: {topic}
+          </h1>
+          <p className="text-gray-600">
+            {results.length} resultados encontrados y categorizados
+            {isRefreshing && (
+              <span className="ml-2 text-blue-600 font-medium">
+                • Actualizando resultados...
+              </span>
+            )}
+          </p>
+        </div>
         </div>
 
         {/* Sección de Exportación */}
@@ -694,8 +694,8 @@ export default function ResearchPageContent() {
                   <span className="text-lg md:text-xl">✅</span>
                   <span className="ml-2">Vale la pena expandir</span>
                   <span className="ml-2 bg-green-200 text-green-800 px-2 py-1 rounded-full text-xs md:text-sm font-medium">
-                    {categorizedResults.expandWorthy.length}
-                  </span>
+                  {categorizedResults.expandWorthy.length}
+                </span>
                 </div>
                 <div className="text-green-600">
                   {expandWorthyExpanded ? (
@@ -717,7 +717,7 @@ export default function ResearchPageContent() {
                     {categorizedResults.expandWorthy.map((result, index) => 
                       renderResultCard(result, index, true)
                     )}
-                  </div>
+                    </div>
                 ) : (
                   <div className="space-y-2 md:space-y-3">
                     {categorizedResults.expandWorthy.map((result, index) => 
@@ -725,7 +725,7 @@ export default function ResearchPageContent() {
                     )}
                   </div>
                 )}
-              </div>
+                </div>
             )}
           </div>
 
@@ -740,8 +740,8 @@ export default function ResearchPageContent() {
                   <span className="text-lg md:text-xl">❌</span>
                   <span className="ml-2">No vale la pena expandir</span>
                   <span className="ml-2 bg-gray-200 text-gray-800 px-2 py-1 rounded-full text-xs md:text-sm font-medium">
-                    {categorizedResults.notExpandWorthy.length}
-                  </span>
+                  {categorizedResults.notExpandWorthy.length}
+                </span>
                 </div>
                 <div className="text-gray-600">
                   {notExpandWorthyExpanded ? (
@@ -769,9 +769,9 @@ export default function ResearchPageContent() {
                     {categorizedResults.notExpandWorthy.map((result, index) => 
                       renderResultListItem(result, index, false)
                     )}
-                  </div>
-                )}
-              </div>
+                    </div>
+                  )}
+                </div>
             )}
           </div>
         </div>

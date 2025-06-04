@@ -119,10 +119,24 @@ src/
 Video completo que muestra todas las funcionalidades:
 
 <div align="center">
-  <video width="80%" controls>
-    <source src="./public/demoVideo.mkv" type="video/x-matroska">
-    <a href="./public/demoVideo.mkv">Ver Video Demo</a>
-  </video>
+  
+  <!-- Opción 1: GIF Demo Directo (sin necesidad de descargar) -->
+  <img src="./public/demoVideo.gif" alt="Demo completo del sistema - Funcionalidades principales" width="80%" />
+  
+  <p><em>👆 Demo interactivo mostrando todas las funcionalidades del sistema</em></p>
+  
+  <!-- Opción 2: Descarga directa desde GitHub Release -->
+  <p>
+    📥 <a href="https://github.com/crisaraoz/infobae-challenge/releases/download/v1.0.0/demoVideo.mkv" target="_blank">
+      Descargar Video Demo Original (17MB)
+    </a>
+  </p>
+  
+  <!-- Enlaces adicionales -->
+  <p>
+    <a href="https://github.com/crisaraoz/infobae-challenge/releases/latest" target="_blank">📦 Ver Release Completo</a>
+  </p>
+
 </div>
 
 ### 🖼️ Galería de Funcionalidades
