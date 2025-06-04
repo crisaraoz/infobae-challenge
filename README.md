@@ -86,7 +86,11 @@ src/
 │   ├── investigation/   # Página de búsqueda
 │   └── article/         # Generación de artículos
 ├── 🧩 components/       # Componentes UI
-└── 🔧 hooks/           # Hooks personalizados
+├── 🔧 hooks/           # Hooks personalizados
+│   ├── useCategorizationRules.ts  # Gestión de reglas personalizadas
+│   ├── useExcelExport.ts          # Exportación a Excel/CSV
+│   └── useResearchCache.ts        # Cache de investigaciones
+└── 
 ```
 
 ### 🔄 Flujo de Funcionamiento
@@ -103,35 +107,76 @@ src/
 ### ✨ Características Principales
 
 - **🔍 Búsqueda Inteligente**: Utiliza Exa API para búsquedas semánticas avanzadas
-- **�� Análisis con IA**: OpenAI procesa y optimiza consultas
+- **🚀 Análisis con IA**: OpenAI procesa y optimiza consultas
 - **📊 Categorización Automática**: Algoritmos heurísticos evalúan relevancia
+- **🎯 Generación Automátática de Artículos y Títulos**: En base a un tópico, url ó imágen provista
 - **⚡ Cache Inteligente**: Sistema de caché para mejorar rendimiento
 - **📱 Responsive Design**: Interfaz adaptada a todos los dispositivos
 - **🎨 UI Moderna**: Componentes con Tailwind CSS y Radix UI
 
-## 📸 Demo
+## 📸 Demo y Capturas del Sistema
 
-**🔍 Proceso de Investigación Completo**
-
-<div align="center">
-  <img src="./public/screen_1.png" alt="Pantalla inicial de investigación" width="45%" />
-  <img src="./public/screen_2.png" alt="Proceso de búsqueda" width="45%" />
-</div>
+### 🎬 Video Demo
 
 <div align="center">
-  <img src="./public/screen_3.png" alt="Resultados categorizados" width="45%" />
-  <img src="./public/screen_4.png" alt="Generación de artículos" width="45%" />
+  
+  <!-- Opción 1: GIF Demo Directo (sin necesidad de descargar) -->
+  <img src="./public/demoVideo.gif" alt="Demo completo del sistema - Funcionalidades principales" width="80%" />
+  
+  <p><em>👆 Demo interactivo mostrando todas las funcionalidades</em></p>
+  
+  <!-- Opción 2: Descarga directa desde GitHub Release -->
+  <p>
+    📥 <a href="https://github.com/crisaraoz/infobae-challenge/releases/download/v1.0.0/demoVideo.mkv" target="_blank">
+      Descargar Video Demo Original (17MB)
+    </a>
+  </p>
+  
+  <!-- Enlaces adicionales -->
+  <p>
+    <a href="https://github.com/crisaraoz/infobae-challenge/releases/latest" target="_blank">📦 Ver Release Completo</a>
+  </p>
+
 </div>
 
-## 🚀 Optimizaciones de Rendimiento
+### 🖼️ Galería de Funcionalidades
 
-### ⚡ Configuraciones Aplicadas
+#### 🔍 1. Página de Investigación Principal
+<div align="center">
+  <img src="./public/screen_1.png" alt="Página principal de investigación - Interfaz moderna para iniciar búsquedas" width="80%" />
+  <p><em>Interfaz principal con búsqueda inteligente y opciones avanzadas</em></p>
+</div>
 
-- **Turbopack**: Compilación ultra-rápida de Next.js 15
-- **Optimización de imports**: Paquetes específicos optimizados
-- **Cache inteligente**: Sistema de caché del filesystem
-- **Type checking opcional**: Modo rápido sin verificación de tipos
-- **Bundle optimization**: Análisis y optimización de bundles
+#### ⚡ 2. Generación de Índices para Investigaciones
+<div align="center">
+  <img src="./public/screen_2.png" alt="Proceso de búsqueda - Indicadores de progreso y estado" width="80%" />
+  <p><em>En base a tópicos predefinidos, personalizados ó URLs/Imágenes</em></p>
+</div>
+
+#### 📊 3. Proceso de Búsqueda en Tiempo Real
+<div align="center">
+  <img src="./public/screen_3.png" alt="Resultados organizados - Categorización automática de contenido" width="80%" />
+  <p><em>Sistema de progreso dinámico con indicadores visuales de estado</em></p>
+</div>
+
+#### 📱 4. Vista de Resultados de Investigaciones
+<div align="center">
+  <img src="./public/screen_4.png" alt="Interfaz móvil optimizada - Design responsive" width="80%" />
+  <p><em>Diseño completamente responsive optimizado para dispositivos desktop/móviles</em></p>
+</div>
+
+#### 🎨 5. Generación de Artículos con IA
+<div align="center">
+  <img src="./public/screen_5.png" alt="Generador de artículos - IA avanzada para creación de contenido" width="80%" />
+  <p><em>Sistema avanzado de generación de artículos desde URLs e imágenes</em></p>
+</div>
+
+#### ✨ 6. Vista de Artículo Optimizada
+<div align="center">
+  <img src="./public/screen_6.png" alt="Artículo generado - Vista optimizada con navegación avanzada" width="80%" />
+  <p><em>Interfaz moderna del artículo con tabla de contenidos, progress tracker y funciones de descarga</em></p>
+</div>
+
 
 ## 🔮 Posibilidad de Mejoras Futuras
 

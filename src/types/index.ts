@@ -60,4 +60,44 @@ export interface GeneratedArticle {
   titles: ArticleTitle[];
   summary: string;
   keywords: string[];
+}
+
+// Tipos para reglas de categorización personalizables
+export interface CategorizationWeights {
+  relevance: number;    // 0-100 (peso de relevancia temática)
+  quality: number;      // 0-100 (peso de calidad del contenido)
+  freshness: number;    // 0-100 (peso de frescura/actualidad)
+  exaScore: number;     // 0-100 (peso del score de Exa)
+}
+
+export interface CategorizationThresholds {
+  expandThreshold: number;     // 0-100 (umbral mínimo para "expandir")
+  minWordCount: number;        // Mínimo de palabras para calidad
+  maxDaysForFresh: number;     // Máximo días para considerar "fresco"
+}
+
+export interface QualityFactors {
+  preferredDomains: string[];     // Dominios que suman puntos de calidad
+  keywordBonus: string[];        // Keywords que suman puntos (datos, estadística, etc.)
+  minimumContentLength: number;   // Longitud mínima del contenido
+}
+
+export interface CustomCategorizationRules {
+  id: string;
+  name: string;
+  description: string;
+  weights: CategorizationWeights;
+  thresholds: CategorizationThresholds;
+  qualityFactors: QualityFactors;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CategorizationPreset {
+  id: string;
+  name: string;
+  description: string;
+  icon?: string;
+  rules: Omit<CustomCategorizationRules, 'id' | 'name' | 'description' | 'isActive' | 'createdAt' | 'updatedAt'>;
 } 

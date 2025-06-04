@@ -1,4 +1,4 @@
-import { ExaSearchResult, CategorizedResult } from '@/types';
+import type { ExaSearchResult, CategorizedResult, CustomCategorizationRules } from '@/types';
 import { searchAndGetContents } from '@/integrations/exa/exaApi';
 import { generateOptimizedQuery, generateSummary } from '@/integrations/openai/openaiService';
 import { categorizeResult } from './heuristics';
@@ -19,7 +19,8 @@ interface ProcessingOptions {
  */
 export async function processSearchResults(
   results: ExaSearchResult[], 
-  topic: string = ''
+  topic: string = '',
+  customRules?: CustomCategorizationRules
 ): Promise<CategorizedResult[]> {
   const categorizedResults: CategorizedResult[] = [];
 
@@ -36,8 +37,8 @@ export async function processSearchResults(
       }
     }
 
-    // Aplicar reglas heurísticas
-    const { category, finalScore, reasoning } = categorizeResult(result, topic);
+    // Aplicar reglas heurísticas con reglas personalizadas
+    const { category, finalScore, reasoning } = categorizeResult(result, topic, customRules);
     
     categorizedResults.push({
       ...result,
@@ -59,7 +60,8 @@ export async function processSearchResults(
  */
 export async function searchAndProcessContent(
   topic: string,
-  options: ProcessingOptions = {}
+  options: ProcessingOptions = {},
+  customRules?: CustomCategorizationRules
 ): Promise<CategorizedResult[]> {
   try {
     // Paso 1: Optimizar la consulta
@@ -76,8 +78,8 @@ export async function searchAndProcessContent(
       return [];
     }
     
-    // Paso 3: Procesar y categorizar resultados
-    const categorizedResults = await processSearchResults(searchResults, topic);
+    // Paso 3: Procesar y categorizar resultados con reglas personalizadas
+    const categorizedResults = await processSearchResults(searchResults, topic, customRules);
     
     return categorizedResults;
   } catch (error) {

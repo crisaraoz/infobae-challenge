@@ -1,22 +1,24 @@
 'use server';
 
-import { CategorizedResult } from '@/types';
+import type { CategorizedResult, CustomCategorizationRules } from '@/types';
 import { fetchResearchResults } from '@/services/researchService';
 
 /**
  * Acción del servidor para realizar investigación sobre un tema específico
  */
-export async function performResearch(topic: string): Promise<CategorizedResult[]> {
+export async function performResearch(
+  topic: string, 
+  customRules?: CustomCategorizationRules
+): Promise<CategorizedResult[]> {
   if (!topic.trim()) {
     throw new Error('El tema de investigación no puede estar vacío');
   }
 
   try {
-    const results = await fetchResearchResults(topic);
+    const results = await fetchResearchResults(topic, customRules);
     return results;
   } catch (error) {
     console.error('Error en performResearch:', error);
-    
     // Manejo específico para errores de timeout
     if (error instanceof Error && error.message.includes('Timeout')) {
       throw new Error(`⏱️ ${error.message.replace('45 segundos', '30 segundos')}`);

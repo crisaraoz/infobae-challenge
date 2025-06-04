@@ -17,7 +17,7 @@ export async function POST(req: Request) {
     }
 
     const result = await generateObject({
-      model: openai('gpt-4-turbo'), // Or your preferred model
+      model: openai('gpt-4-turbo'), // Or another model
       schema: z.object({
         titles: z.array(z.string()).length(numTitles).describe(`Array de ${numTitles} títulos atractivos y optimizados para SEO en español.`)
       }),

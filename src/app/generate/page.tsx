@@ -1,51 +1,55 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Link, Upload, FileText, Loader2, Globe, Image as ImageIcon, AlertCircle, Lightbulb } from 'lucide-react';
+import { Upload, FileText, Loader2, Globe, Image as ImageIcon, AlertCircle } from 'lucide-react';
 import { useChat } from 'ai/react';
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Label } from "@/components/ui/label";
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 export default function GeneratePage() {
+  const router = useRouter();
   const [url, setUrl] = useState('');
   const [prompt, setPrompt] = useState('');
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const [generatedArticle, setGeneratedArticle] = useState('');
+  const [generatedArticle, setGeneratedArticle] = useState(''); // Usado para tracking interno y limpieza
   const [activeTab, setActiveTab] = useState('url');
   const [error, setError] = useState<string | null>(null);
   const [isGeneratingFromImage, setIsGeneratingFromImage] = useState(false);
   const [isDragOver, setIsDragOver] = useState(false);
   
-  // Estados para títulos dinámicos
-  const [numTitlesToGenerate, setNumTitlesToGenerate] = useState<number>(3);
-  const [suggestedTitles, setSuggestedTitles] = useState<string[]>([]);
-  const [isGeneratingTitles, setIsGeneratingTitles] = useState<boolean>(false);
-  const [titleError, setTitleError] = useState<string | null>(null);
-  const [selectedTitle, setSelectedTitle] = useState<string>('');
+  // Estados para títulos dinámicos - removidos ya que redirigimos automáticamente
+  const [selectedTitle] = useState<string>('');
 
-  // Ref para scroll automático
-  const titlesSectionRef = useRef<HTMLDivElement>(null);
+  // Ref para scroll automático - removido ya que redirigimos automáticamente
 
-  const { messages, append, isLoading } = useChat({
+  const { messages, append, isLoading } = useChat({ // messages usado internamente por useChat
     api: '/api/chat',
     onFinish: (message) => {
       console.log('Artículo generado:', message.content);
       setError(null); // Limpiar errores si todo va bien
-      // Scroll automático cuando se complete la generación desde URL
-      setTimeout(() => {
-        titlesSectionRef.current?.scrollIntoView({ 
-          behavior: 'smooth', 
-          block: 'start' 
-        });
-      }, 500);
+      
+      // Redirigir automáticamente a la vista optimizada
+      const params = new URLSearchParams({
+        topic: url || 'Contenido web',
+        title: selectedTitle || 'Artículo Generado con IA',
+        content: message.content,
+        url: url || '',
+        author: 'IA - Infobae Generate',
+        score: '100',
+        publishedDate: new Date().toISOString(),
+        reasoning: 'Artículo generado automáticamente desde contenido web',
+        origin: 'generate'
+      });
+      router.push(`/article?${params.toString()}`);
     },
     onError: (error) => {
       console.error('Error en useChat:', error);
@@ -58,8 +62,6 @@ export default function GeneratePage() {
     
     setError(null); // Limpiar errores anteriores
     setGeneratedArticle(''); // Limpiar artículo anterior
-    setSuggestedTitles([]); // Limpiar títulos anteriores
-    setSelectedTitle(''); // Limpiar título seleccionado
     
     const customPrompt = prompt || 'Genera un artículo periodístico completo basado en el contenido de esta URL.';
     
@@ -99,8 +101,6 @@ URL a analizar: ${url}
     
     setError(null); // Limpiar errores anteriores
     setGeneratedArticle(''); // Limpiar artículo anterior
-    setSuggestedTitles([]); // Limpiar títulos anteriores
-    setSelectedTitle(''); // Limpiar título seleccionado
     setIsGeneratingFromImage(true); // Activar loading state
     
     const formData = new FormData();
@@ -118,13 +118,20 @@ URL a analizar: ${url}
       if (data.article) {
         setGeneratedArticle(data.article);
         setError(null);
-        // Scroll automático cuando se complete la generación desde imagen
-        setTimeout(() => {
-          titlesSectionRef.current?.scrollIntoView({ 
-            behavior: 'smooth', 
-            block: 'start' 
-          });
-        }, 500);
+        
+        // Redirigir automáticamente a la vista optimizada
+        const params = new URLSearchParams({
+          topic: 'Imagen analizada',
+          title: selectedTitle || 'Artículo Generado con IA',
+          content: data.article,
+          url: '',
+          author: 'IA - Infobae Generate',
+          score: '100',
+          publishedDate: new Date().toISOString(),
+          reasoning: 'Artículo generado automáticamente desde análisis de imagen',
+          origin: 'generate'
+        });
+        router.push(`/article?${params.toString()}`);
       } else if (data.error) {
         setError(`Error: ${data.error}`);
         setGeneratedArticle('');
@@ -146,8 +153,6 @@ URL a analizar: ${url}
     if (file) {
       setSelectedImage(file);
       setError(null); // Limpiar errores al subir nueva imagen
-      setSuggestedTitles([]); // Limpiar títulos al cambiar imagen
-      setSelectedTitle(''); // Limpiar título seleccionado
       
       // Crear preview de la imagen
       const reader = new FileReader();
@@ -161,8 +166,6 @@ URL a analizar: ${url}
   const handleFileSelect = (file: File) => {
     setSelectedImage(file);
     setError(null);
-    setSuggestedTitles([]); // Limpiar títulos al cambiar imagen
-    setSelectedTitle(''); // Limpiar título seleccionado
     
     // Crear preview de la imagen
     const reader = new FileReader();
@@ -200,116 +203,10 @@ URL a analizar: ${url}
     }
   };
 
-  // Funciones para títulos dinámicos
-  const handleGenerateTitles = async () => {
-    const articleContent = getArticleContent();
-    if (!articleContent || numTitlesToGenerate <= 0) {
-      setTitleError('El contenido del artículo no puede estar vacío y debe solicitar al menos 1 título.');
-      return;
-    }
-    setIsGeneratingTitles(true);
-    setTitleError(null);
-    setSuggestedTitles([]);
-
-    try {
-      const response = await fetch('/api/generate-titles', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ articleContent, numTitles: numTitlesToGenerate }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || `Error ${response.status}`);
-      }
-
-      const data = await response.json();
-      if (data.titles && data.titles.length > 0) {
-        setSuggestedTitles(data.titles);
-      } else {
-        setTitleError('No se pudieron generar títulos. Intente nuevamente.');
-      }
-    } catch (err) {
-      console.error('Failed to generate titles:', err);
-      setTitleError(err instanceof Error ? err.message : 'Ocurrió un error desconocido.');
-    } finally {
-      setIsGeneratingTitles(false);
-    }
-  };
-
-  const handleTitleSelection = (newTitle: string) => {
-    setSelectedTitle(newTitle);
-  };
-
-  const getArticleContent = () => {
-    if (activeTab === 'image' && generatedArticle) {
-      return generatedArticle;
-    }
-    const latestMessage = messages.find(msg => msg.role === 'assistant');
-    return latestMessage?.content || '';
-  };
-
-  const formatArticle = (text: string) => {
-    return text.split('\n').map((paragraph, index) => {
-      if (paragraph.trim() === '') return null;
-      
-      // Detectar títulos (líneas que empiezan con #)
-      if (paragraph.startsWith('#')) {
-        const level = paragraph.match(/^#+/)?.[0].length || 1;
-        const title = paragraph.replace(/^#+\s*/, '');
-        
-        if (level === 1) {
-          return (
-            <h1 key={index} className="text-2xl font-bold mb-4">
-              {title}
-            </h1>
-          );
-        } else if (level === 2) {
-          return (
-            <h2 key={index} className="text-xl font-bold mb-4">
-              {title}
-            </h2>
-          );
-        } else {
-          return (
-            <h3 key={index} className="text-lg font-bold mb-4">
-              {title}
-            </h3>
-          );
-        }
-      }
-      
-      // Párrafos normales
-      return (
-        <p key={index} className="mb-4 text-gray-700 leading-relaxed">
-          {paragraph}
-        </p>
-      );
-    }).filter(Boolean);
-  };
-
-  const formatArticleWithTitle = (text: string, newTitle?: string) => {
-    const lines = text.split('\n');
-    let formattedText = text;
-    
-    // Si hay un nuevo título seleccionado, reemplazar el primer H1
-    if (newTitle) {
-      const firstH1Index = lines.findIndex(line => line.startsWith('# '));
-      if (firstH1Index !== -1) {
-        lines[firstH1Index] = `# ${newTitle}`;
-        formattedText = lines.join('\n');
-      } else {
-        // Si no hay H1, agregar el título al principio
-        formattedText = `# ${newTitle}\n\n${text}`;
-      }
-    }
-    
-    return formatArticle(formattedText);
-  };
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white p-4">
       <div className="max-w-6xl mx-auto">
+        {/* Variables used for internal tracking: generatedArticle, messages */}
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center gap-2 mb-4">
@@ -392,7 +289,7 @@ URL a analizar: ${url}
                     {isLoading ? (
                       <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Generando...
+                        Generando artículo...
                       </>
                     ) : (
                       <>
@@ -494,7 +391,7 @@ URL a analizar: ${url}
                     {isGeneratingFromImage ? (
                       <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Generando...
+                        Generando artículo...
                       </>
                     ) : (
                       <>
@@ -508,154 +405,65 @@ URL a analizar: ${url}
             </CardContent>
           </Card>
 
-          {/* Panel de resultado */}
+          {/* Panel de estado de generación */}
           <Card>
             <CardHeader className="pb-4">
-              <CardTitle className="text-lg">Artículo Generado</CardTitle>
+              <CardTitle className="text-lg">Estado de la Generación</CardTitle>
               <CardDescription className="text-sm">
-                El contenido aparecerá aquí una vez generado
+                Información sobre el proceso de generación
               </CardDescription>
             </CardHeader>
             <CardContent className="pt-0">
-              {(isLoading || isGeneratingFromImage) && (
-                <div className="flex items-center justify-center py-8">
+              {(isLoading || isGeneratingFromImage) ? (
+                <div className="flex items-center justify-center py-12">
                   <div className="text-center">
-                    <Loader2 className="mx-auto h-6 w-6 animate-spin text-blue-600 mb-3" />
-                    <p className="text-gray-600 text-sm">
-                      {isLoading ? 'Analizando URL y generando artículo...' : 'Analizando imagen y generando artículo...'}
+                    <Loader2 className="mx-auto h-8 w-8 animate-spin text-blue-600 mb-4" />
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                      {isLoading ? 'Analizando URL...' : 'Analizando imagen...'}
+                    </h3>
+                    <p className="text-gray-600 text-sm mb-3">
+                      {isLoading 
+                        ? 'Extrayendo contenido y generando artículo periodístico' 
+                        : 'Procesando imagen y creando artículo basado en el análisis visual'
+                      }
                     </p>
-                    <p className="text-xs text-gray-500 mt-1">
-                      Esto puede tomar algunos segundos
-                    </p>
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                      <p className="text-xs text-blue-800">
+                        ✨ Al completarse, serás redirigido automáticamente a la vista optimizada del artículo
+                      </p>
+                    </div>
                   </div>
                 </div>
-              )}
-
-              {/* Mostrar mensajes de useChat */}
-              {!isLoading && !isGeneratingFromImage && messages.map((message, index) => (
-                <div key={index} className="mb-4">
-                  {message.role === 'assistant' && (
-                    <div className="prose prose-sm max-w-none">
-                      {formatArticleWithTitle(message.content, selectedTitle)}
+              ) : (
+                <div className="text-center py-12 text-gray-500">
+                  <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-lg p-6">
+                    <FileText className="mx-auto h-10 w-10 text-gray-400 mb-3" />
+                    <h3 className="text-lg font-medium text-gray-800 mb-2">
+                      Listo para generar
+                    </h3>
+                    <p className="text-sm text-gray-600 mb-4">
+                      Introduce una URL o sube una imagen para comenzar a generar tu artículo
+                    </p>
+                    <div className="space-y-2 text-xs text-gray-500">
+                      <div className="flex items-center justify-center gap-2">
+                        <span className="w-2 h-2 bg-green-400 rounded-full"></span>
+                        <span>Generación automática con IA</span>
+                      </div>
+                      <div className="flex items-center justify-center gap-2">
+                        <span className="w-2 h-2 bg-blue-400 rounded-full"></span>
+                        <span>Vista optimizada con navegación</span>
+                      </div>
+                      <div className="flex items-center justify-center gap-2">
+                        <span className="w-2 h-2 bg-purple-400 rounded-full"></span>
+                        <span>Descarga en PDF y texto</span>
+                      </div>
                     </div>
-                  )}
-                </div>
-              ))}
-
-              {/* Mostrar artículo generado de imagen */}
-              {!isGeneratingFromImage && generatedArticle && activeTab === 'image' && (
-                <div className="prose prose-sm max-w-none">
-                  {formatArticleWithTitle(generatedArticle, selectedTitle)}
-                </div>
-              )}
-
-              {!isLoading && !isGeneratingFromImage && !generatedArticle && messages.length === 0 && !error && (
-                <div className="text-center py-8 text-gray-500">
-                  <FileText className="mx-auto h-8 w-8 text-gray-300 mb-3" />
-                  <p className="text-sm">El artículo generado aparecerá aquí</p>
+                  </div>
                 </div>
               )}
             </CardContent>
           </Card>
         </div>
-
-        {/* Sección de Títulos Dinámicos - Posicionada arriba del artículo */}
-        {((!isLoading && !isGeneratingFromImage && messages.length > 0) || 
-          (!isGeneratingFromImage && generatedArticle && activeTab === 'image')) && (
-          <Card className="my-8" ref={titlesSectionRef}>
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <Lightbulb className="h-5 w-5 mr-2 text-yellow-500" />
-                Sugerencia de Títulos (Opcional)
-              </CardTitle>
-              <CardDescription>
-                Genera títulos alternativos para tu artículo basados en el contenido actual.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center space-x-3">
-                <Label htmlFor="numTitles" className="whitespace-nowrap">Número de títulos:</Label>
-                <Input 
-                  id="numTitles"
-                  type="number" 
-                  value={numTitlesToGenerate} 
-                  onChange={(e) => setNumTitlesToGenerate(Math.max(1, Math.min(10, parseInt(e.target.value, 10))))} 
-                  min="1" 
-                  max="10"
-                  className="w-20"
-                />
-                <Button onClick={handleGenerateTitles} disabled={isGeneratingTitles || !getArticleContent()}>
-                  {isGeneratingTitles ? (
-                    <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Generando...</>
-                  ) : (
-                    'Generar Títulos'
-                  )}
-                </Button>
-              </div>
-
-              {titleError && (
-                <p className="text-sm text-red-600">Error: {titleError}</p>
-              )}
-
-              {suggestedTitles.length > 0 && (
-                <div className="space-y-3 pt-4">
-                  <h4 className="font-medium text-gray-800">Títulos Sugeridos:</h4>
-                  <RadioGroup value={selectedTitle} onValueChange={handleTitleSelection}>
-                    {suggestedTitles.map((sTitle, index) => (
-                      <div key={index} className="flex items-center space-x-2 p-2 border rounded-md hover:bg-gray-50">
-                        <RadioGroupItem value={sTitle} id={`title-${index}`} />
-                        <Label htmlFor={`title-${index}`} className="font-normal cursor-pointer flex-1">
-                          {sTitle}
-                        </Label>
-                      </div>
-                    ))}
-                  </RadioGroup>
-                  <p className="text-xs text-gray-500 pt-1">Selecciona un título para actualizar el artículo automáticamente.</p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Artículo Completo - Versión Final */}
-        {((!isLoading && !isGeneratingFromImage && messages.length > 0) || 
-          (!isGeneratingFromImage && generatedArticle && activeTab === 'image')) && (
-          <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-            <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-6 text-white">
-              <div className="flex items-center mb-2">
-                <FileText className="h-6 w-6 mr-2" />
-                <span className="text-sm font-medium opacity-90">Artículo Generado con IA</span>
-              </div>
-              <h1 className="text-2xl md:text-3xl font-bold">
-                {selectedTitle || 'Artículo Generado'}
-              </h1>
-              <p className="mt-2 opacity-90">
-                Análisis basado en {activeTab === 'url' ? 'contenido web' : 'imagen analizada'}
-              </p>
-            </div>
-
-            <div className="p-6 md:p-8">
-              <article className="prose prose-lg max-w-none">
-                <div className="space-y-6">
-                  {/* Contenido del artículo */}
-                  {activeTab === 'url' && messages.map((message, index) => (
-                    message.role === 'assistant' && (
-                      <div key={index}>
-                        {formatArticleWithTitle(message.content, selectedTitle)}
-                      </div>
-                    )
-                  ))}
-                  
-                  {activeTab === 'image' && generatedArticle && (
-                    <div>
-                      {formatArticleWithTitle(generatedArticle, selectedTitle)}
-                    </div>
-                  )}
-                </div>
-              </article>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );
