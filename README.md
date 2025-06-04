@@ -147,22 +147,22 @@ src/
   <p><em>Interfaz principal con búsqueda inteligente y opciones avanzadas</em></p>
 </div>
 
-#### ⚡ 2. Proceso de Búsqueda en Tiempo Real
+#### ⚡ 2. Generación de Índices para Investigaciones
 <div align="center">
   <img src="./public/screen_2.png" alt="Proceso de búsqueda - Indicadores de progreso y estado" width="80%" />
+  <p><em>En base a tópicos predefinidos, personalizados ó URLs/Imágenes</em></p>
+</div>
+
+#### 📊 3. Proceso de Búsqueda en Tiempo Real
+<div align="center">
+  <img src="./public/screen_3.png" alt="Resultados organizados - Categorización automática de contenido" width="80%" />
   <p><em>Sistema de progreso dinámico con indicadores visuales de estado</em></p>
 </div>
 
-#### 📊 3. Resultados Categorizados
-<div align="center">
-  <img src="./public/screen_3.png" alt="Resultados organizados - Categorización automática de contenido" width="80%" />
-  <p><em>Resultados organizados automáticamente por relevancia y calidad</em></p>
-</div>
-
-#### 📱 4. Vista Responsive Móvil
+#### 📱 4. Vista de Resultados de Investigaciones
 <div align="center">
   <img src="./public/screen_4.png" alt="Interfaz móvil optimizada - Design responsive" width="80%" />
-  <p><em>Diseño completamente responsive optimizado para dispositivos móviles</em></p>
+  <p><em>Diseño completamente responsive optimizado para dispositivos desktop/móviles</em></p>
 </div>
 
 #### 🎨 5. Generación de Artículos con IA
